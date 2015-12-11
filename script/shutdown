@@ -1,0 +1,3 @@
+#/bin/bash
+#sudo shutdown -h now
+lxsession-logout --banner "/usr/share/pixmaps/fedora-logo-small.png" --side=top
