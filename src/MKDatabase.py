@@ -89,9 +89,9 @@ class MKDatabase(object):
 	def setSetpoint(self, temperature, pressure, argon, ethanol):
 		self.sql = """UPDATE `cvd`.`runtime`
 			SET	`spTemperature` = %s,
-				`spPressure` 	= %s,
-				`spEthanol` 	= %s,
-				`spArgon` 		= %s
+				`spPressure`	= %s,
+				`spEthanol`	= %s,
+				`spArgon`	= %s
 			LIMIT 1;"""  % (temperature, pressure, ethanol, argon)
 		self.write()
 	def setData(self, temperature, pressure, argon, ethanol):
@@ -100,10 +100,10 @@ class MKDatabase(object):
 		self.argon = decimal.Decimal(argon)
 		self.ethanol = decimal.Decimal(ethanol)
 		self.sql = """UPDATE `cvd`.`runtime`
-			SET	`temperature` 	= %s,
-				`pressure` 		= %s,
-				`ethanol` 		= %s,
-				`argon` 		= %s
+			SET	`temperature`	= %s,
+				`pressure`	= %s,
+				`ethanol`	= %s,
+				`argon`		= %s
 			LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
 		self.write()
 	def setMessage(self, message):

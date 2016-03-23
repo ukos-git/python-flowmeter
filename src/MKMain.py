@@ -7,7 +7,7 @@ import time			# sleep
 
 #def transmitter(mySerial arduino, myTerminal terminal):
 
-def main():	
+def main():
 	def myTransmitter(arduino, terminal):
 		#while arduino.isAlive() and terminal.isAlive():
 		parser = MKParser.MKParser()
@@ -19,7 +19,7 @@ def main():
 			if arduino.isReady():
 				parser.input(arduino.getMessage())
 				oneline = parser.oneline()
-				if parser.getStatus():					
+				if parser.getStatus():
 					terminal.display(oneline)
 					#terminal.display("")
 				if not parser.isHeadline() and parser.getStatus():
@@ -44,7 +44,7 @@ def main():
 	terminal = MKTerminal.MKTerminal()
 	transmitter = threading.Thread(target=myTransmitter, args=(arduino,terminal))
 	transmitter.setDaemon(True) # never care about it anymore
-			
+
 	# Add threads to thread list
 	threads.append(arduino)
 	threads.append(terminal)

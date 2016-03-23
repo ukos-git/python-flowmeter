@@ -1,47 +1,47 @@
 #!/usr/bin/env python
 from MKFlowInput import MKFlowInput
+from MKFlowCommunication import MKFlowCommunication
 
 def main():
     Input = MKFlowInput()
-    Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log2.log')
-    i=0
-    while Input.isAlive() and i < 10000:
-        i+=1
-        if Input.isReady():
-            try:
-                Message = Input.getMessage()
-            except:
-                Input.kill()
-                pass
+    Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
+    Storage = MKFlowCommunication()
+    while Input.isAlive():
+        try:
+            Message = Input.getMessage()
+            SubMessage = Message.getSubType()
+        except:
+            Input.kill()
+            break
+        else:
+            if not Message.isInvalid:
+                node = Message.getNode()
+                sequence = Message.getSequence()
+                Entity = Storage.Node(node).Sequence(sequence)
+                try:
+                    if Message.isError:
+                        Entity.setError(Message)
+                    if Message.isStatus:
+                        Entity.setStatus(Message)
+                    if Message.isSent:
+                        Entity.setAnswer(Message)
+                    if Message.isSentStatus:
+                        Entity.setWriteRequest(Message)
+                    if Message.isRequest:
+                        Entity.setReadRequest(Message)
+                except:
+                    print "--- something happened ---"
+                    Message.stdout()
+                    Submessage.stdout()
+                    Entity.reset()
+                else:
+                    # store if two messages are present in current Entity
+                    # reset Entity afterwards.
+                    Entity.store()
             else:
-                if Message.isInvalid:
-                    print "%i\t  --- invalid ---" % i
-                    Message.stdout()
-                    Message.Invalid.stdout()
-                    print Message.Invalid.stdoutShort(Message.stdoutShort(i))
-                    pass
-                if Message.isError:
-                    print "%i\t --- error ---" % i
-                    Message.stdout()
-                    Message.Error.stdout()
-                    print Message.Error.stdoutShort(Message.stdoutShort(i))
-                    pass
-                if Message.isStatus:
-                    print "%i\t --- status ---" % i
-                    Message.stdout()
-                    Message.Status.stdout()
-                    print Message.Status.stdoutShort(Message.stdoutShort(i))
-                    pass
-                if Message.isSent:
-                    print "%i\t --- send ---" % i
-                    Message.stdout()
-                    Message.Sent.stdout()
-                    print Message.Sent.stdoutShort(Message.stdoutShort(i))
-                    pass
-                if Message.isRequest:
-                    print "%i\t --- request ---" % i
-                    Message.stdout()
-                    Message.Request.stdout()
-                    print Message.Request.stdoutShort(Message.stdoutShort(i))
-                    pass                        
+                print "--- invalid ---"
+                SubMessage.stdoutShort(Message.stdoutShort())
+                pass
 main()
+
+
