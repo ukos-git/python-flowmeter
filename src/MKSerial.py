@@ -4,6 +4,7 @@ import serial						# imports pyserial API
 import struct						# imports struct API
 import sys							# sys.exit()
 import threading					# multithreading
+import time							# sleep
 from MKLogFile import MKLogFileHandler
 
 LF = serial.to_bytes([10])
@@ -38,9 +39,7 @@ class MKSerial:
 			sys.exit(1)
 		try:
 			self.run = MKLogFileHandler(self.serialName,'run')
-			self.log = MKLogFileHandler(self.serialName,'log')
 			self.run.open()
-			self.log.open()
 		except:
 			self.error.write('error opening log files')
 			
@@ -98,10 +97,9 @@ class MKSerial:
 	
 	def read(self):
 		val = self.serial.readline();  #read line by line data from the serial file
-		self.receiveBuffer+=val 	#clear from time to time!
+		self.receiveBuffer += val 	#clear from time to time!
 		self.ready=True
-		self.log.write(val)
-		self.run.write(val)		
+		self.run.write(val)
 		
 	def write(self):
 		if not self.sendBuffer == '':
@@ -123,7 +121,7 @@ class MKSerial:
 			except:
 				self.error.write('Exception in infinite Loop')
 				self.stop()
-				
+			time.sleep(0.1)
 	def isAlive(self):
 		return self.alive
 		

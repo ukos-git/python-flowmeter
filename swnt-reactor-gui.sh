@@ -1,3 +1,3 @@
 #!/bin/bash
-#python ~/swnt-reactor/src/MKtkinker.py
-python ~/Programs/python/swnt-reactor/src/MKtkinker.py
+#python /home/pi/programs/swnt-reactor/src/MKTkinker.py
+python /home/matthias/Documents/programs/python/swnt-reactor/src/MKTkinker.py

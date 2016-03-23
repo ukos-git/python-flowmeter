@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+#import struct                       # imports struct API ???
+import os                           # imports file system functions like open()
+
+import MKFlowMessage                # Message analyis class
+# Main Class
+class MKFlowInput():
+    def __init__(self):
+        self.logfile = '/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log2.log'
+        self.openmode='r'
+        self.message1 = ''
+        self.message2 = ''
+        self.fsoOpen    = False
+        self.ready = False
+        self.selfTest()
+        
+    def open(self):
+        if (not self.fsoOpen):
+            try:
+                self.fso = open(self.logfile, self.openmode)
+            except:
+                self.close()
+                raise ValueError('cannot open log file at ' + self.logfile)
+            else:
+                self.fsoOpen = True
+
+    def close(self):
+        if self.fsoOpen:
+            try:
+                self.fso.close()
+            except:
+                raise ValueError('cannot close log file at ' + self.logfile)
+            else:
+                self.fsoOpen = False
+            
+    def write(self, strWrite):
+        self.open()
+        self.fso.write(strWrite)
+        self.fso.write('\n')
+        self.close()
+            
+    def getMessage(self):
+        if self.isReady():
+            # reset "ready-flag" at message readout
+            self.ready = False
+            if self.isValid():
+                message = self.Message(self.message1, self.message2[1:])
+                return message        
+            else:
+                raise ValueError('Message Invalid')
+                return None
+        else:
+            return None
+            
+    def isValid(self):
+        try:
+            if not self.message1:
+                raise ValueError('message1 invalid')       
+            if not self.message2:
+                raise ValueError('message2 invalid')            
+        except:
+            # no raise here. message is invalid.
+            return False
+        else:
+            return True
+            
+    def setLogFile(self,filename):
+        self.logfile = filename
+    
+    def isReady(self):
+        if self.ready:
+            return True
+        else:
+            try:
+                self.open()
+                self.message1 = self.fso.readline()
+                self.message2 = self.fso.readline()
+            except:
+                # no raise here. we are not ready. return this status and close file
+                self.ready = False
+                self.close()
+            else:
+                self.ready = True
+        return self.ready
+        
+    def isAlive(self):
+        return self.alive
+        
+    def kill(self):
+        self.alive = False
+        
+    def selfTest(self):
+        try:
+            self.open()
+            self.close()
+        except:
+            self.alive = False
+        else:
+            self.alive = True
+        
+    class Message(MKFlowMessage.MKFlowMessage):
+        class Invalid(MKFlowMessage.MKFlowInvalid):
+            pass
+        class Error(MKFlowMessage.MKFlowError):
+            pass
+        class Status(MKFlowMessage.MKFlowStatus):
+            pass
+        class Request(MKFlowMessage.MKFlowRequest):
+            pass
+        class Sent(MKFlowMessage.MKFlowSent):
+            pass
+# end MKFlow

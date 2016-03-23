@@ -6,6 +6,7 @@ class MKParser:
 	name = 'parser'
 	message = ['time','Temperature','temp','spTemp','Pressure','press','spPress','Argon','argon','spArgon','EtOH','etoh','spEtoh']
 	length = 0
+	status = False
 	def __init__(self):
 		try:
 			self.error = MKLogFileHandler(self.name,'error')
@@ -15,19 +16,20 @@ class MKParser:
 			print self.error.getError()
 			sys.exit(1)
 		try:
-			self.log = MKLogFileHandler(self.name,'log')
+			self.log = MKLogFileHandler(self.name,'run')
 			self.log.open()
+			self.log.setNewLine('\n')
 		except:
 			self.error.write('error opening log file')
 	def input(self,strInput):
 		self.log.write('input received')
 		if self.parse(strInput):			
 			# process content and save as array
-			return self.output()
+			self.status = True
 		else:
 			self.error.write('length missmatch in string. Counting ' + str(self.length) + ' items')
-			return 'Error\n'
-	
+			self.status = False
+		return self.status
 	def parse(self,strInput,intArduinoVersion=None): 
 		if intArduinoVersion is None:
 			intArduinoVersion = 2
@@ -50,9 +52,6 @@ class MKParser:
 				self.message[11]=extractMe[19]# etoh
 				self.message[12]=extractMe[22]# spetoh
 				success = True
-			else:
-				success = False
-			return success
 		elif intArduinoVersion == 3:
 			if self.length == 18:
 				self.message[0]=extractMe[0]
@@ -69,17 +68,19 @@ class MKParser:
 				self.message[11]=extractMe[15]# etoh
 				self.message[12]=extractMe[18]# spetoh
 				success = True
-			else:
-				success = False
-			return success
-		return False
-	
-	def output(self):
+		return success
+	def oneline(self):
 		strReturn = ''
-		for i in self.message:			
+		for i in self.message:
 			strReturn += i + '\t'
 		strReturn += '\n'
 		return strReturn
-		
+	def isHeadline(self):
+		if self.get(2) == "temp":
+			return True
+		else:
+			return False
+	def getStatus(self):
+		return self.status
 	def get(self,position):
-		return message[position]
+		return self.message[position]

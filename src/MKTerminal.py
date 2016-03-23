@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, threading
+import sys, os, threading, time
 
 if sys.version_info >= (3, 0):
 	def character(b):
@@ -65,13 +65,14 @@ class MKTerminal(object):
 			if self.echo == True:				
 				sys.stdout.write(c)
 				sys.stdout.flush()
-				
+		time.sleep(0.1)
 	def write(self):
 		while self.alive:
 			if self.readyToDisplay:
 				sys.stdout.write(self.printme)
 				sys.stdout.flush()
-				self.readyToDisplay=False			
+				self.readyToDisplay=False
+			time.sleep(0.1)
 				
 	def isAlive(self):
 		return self.alive

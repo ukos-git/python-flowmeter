@@ -1,0 +1,635 @@
+1	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.012908', '', 'length=24', 'from=0', 'to=23']
+['10', '02', '01', '80', '11', '04', '01', '80', '00', '01', '81', '00', '02', '82', '00', '03', '83', '00', '04', '04', '00', '05', '10', '03']
+direction:  right
+length:  24
+time:  2015-06-08 13:38:21.012
+seconds:  49101.012908
+sequence:  1
+node:  128
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 128, 0, 1, 129, 0, 2, 130, 0, 3, 131, 0, 4, 4, 0, 5]
+	Data Array: 	[1, 128, 0, 1, 129, 0, 2, 130, 0, 3, 131, 0, 4, 4, 0, 5]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 128, 0, 1, 129, 0, 2, 130, 0, 3, 131, 0, 4, 4, 0, 5]
+		Data:	[1, 128, 0, 1, 129, 0, 2, 130, 0, 3, 131, 0, 4, 4, 0, 5]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  5
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[128, 0, 1]
+			1st byte:	1000 0000
+			Chained: 	True
+			Index:   	0
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0001
+			DataType:	character
+			FbNr:    	1
+			Length:  	3
+			Human Ind:	Primary node address
+			-- MKFlowRequest Class Output End --
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[129, 0, 2]
+			1st byte:	1000 0001
+			Chained: 	True
+			Index:   	1
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0010
+			DataType:	character
+			FbNr:    	2
+			Length:  	3
+			Human Ind:	Secondary node address
+			-- MKFlowRequest Class Output End --
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[130, 0, 3]
+			1st byte:	1000 0010
+			Chained: 	True
+			Index:   	2
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0011
+			DataType:	character
+			FbNr:    	3
+			Length:  	3
+			Human Ind:	Next node address
+			-- MKFlowRequest Class Output End --
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[131, 0, 4]
+			1st byte:	1000 0011
+			Chained: 	True
+			Index:   	3
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0100
+			DataType:	character
+			FbNr:    	4
+			Length:  	3
+			Human Ind:	Last node address
+			-- MKFlowRequest Class Output End --
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[4, 0, 5]
+			1st byte:	0000 0100
+			Chained: 	False
+			Index:   	4
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0101
+			DataType:	character
+			FbNr:    	5
+			Length:  	3
+			Human Ind:	Arbitrage
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+1	128	1	REQ	0	0	1	Primary node address
+2	 --- send ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.028538', '', 'length=19', 'from=0', 'to=18']
+['10', '02', '01', '80', '0c', '02', '01', '80', '03', '81', '7f', '82', '04', '83', '20', '04', '43', '10', '03']
+direction:  left
+length:  19
+time:  2015-06-08 13:38:21.028
+seconds:  49101.028538
+sequence:  1
+node:  128
+command:  2
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 128, 3, 129, 127, 130, 4, 131, 32, 4, 67]
+	Data Array: 	[1, 128, 3, 129, 127, 130, 4, 131, 32, 4, 67]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 128, 3, 129, 127, 130, 4, 131, 32, 4, 67]
+		Data:	[1, 128, 3, 129, 127, 130, 4, 131, 32, 4, 67]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  5
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[128, 3]
+			1st byte:	1000 0000
+			Chained: 	True
+			DataType:	character
+			Index:    	0
+			2nd byte:	0000 0011
+			Length:  	2
+			Value:   	3
+			Human Ind:	
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[129, 127]
+			1st byte:	1000 0001
+			Chained: 	True
+			DataType:	character
+			Index:    	1
+			2nd byte:	0111 1111
+			Length:  	2
+			Value:   	127
+			Human Ind:	
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[130, 4]
+			1st byte:	1000 0010
+			Chained: 	True
+			DataType:	character
+			Index:    	2
+			2nd byte:	0000 0100
+			Length:  	2
+			Value:   	4
+			Human Ind:	
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[131, 32]
+			1st byte:	1000 0011
+			Chained: 	True
+			DataType:	character
+			Index:    	3
+			2nd byte:	0010 0000
+			Length:  	2
+			Value:   	32
+			Human Ind:	
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[4, 67]
+			1st byte:	0000 0100
+			Chained: 	False
+			DataType:	character
+			Index:    	4
+			2nd byte:	0100 0011
+			Length:  	2
+			Value:   	67
+			Human Ind:	Control mode
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+2	128	1	ST2	1	0	None	3
+3	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.040534', '', 'length=12', 'from=24', 'to=35']
+['10', '02', '02', '03', '05', '04', '01', '05', '00', '1a', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:21.040
+seconds:  49101.040534
+sequence:  2
+node:  3
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 5, 0, 26]
+	Data Array: 	[1, 5, 0, 26]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 5, 0, 26]
+		Data:	[1, 5, 0, 26]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[5, 0, 26]
+			1st byte:	0000 0101
+			Chained: 	False
+			Index:   	5
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0001 1010
+			DataType:	character
+			FbNr:    	26
+			Length:  	3
+			Human Ind:	
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+3	3	2	REQ	0	5	26	
+4	 --- send ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.053489', '', 'length=11', 'from=19', 'to=29']
+['10', '02', '02', '03', '04', '02', '01', '05', '02', '10', '03']
+direction:  left
+length:  11
+time:  2015-06-08 13:38:21.053
+seconds:  49101.053489
+sequence:  2
+node:  3
+command:  2
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 5, 2]
+	Data Array: 	[1, 5, 2]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 5, 2]
+		Data:	[1, 5, 2]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[5, 2]
+			1st byte:	0000 0101
+			Chained: 	False
+			DataType:	character
+			Index:    	5
+			2nd byte:	0000 0010
+			Length:  	2
+			Value:   	2
+			Human Ind:	Polynomial constant A
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+4	3	2	ST2	1	5	None	2
+5	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.063378', '', 'length=12', 'from=36', 'to=47']
+['10', '02', '03', '05', '05', '04', '01', '06', '00', '03', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:21.063
+seconds:  49101.063378
+sequence:  3
+node:  5
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 6, 0, 3]
+	Data Array: 	[1, 6, 0, 3]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 6, 0, 3]
+		Data:	[1, 6, 0, 3]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[6, 0, 3]
+			1st byte:	0000 0110
+			Chained: 	False
+			Index:   	6
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0011
+			DataType:	character
+			FbNr:    	3
+			Length:  	3
+			Human Ind:	Next node address
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+5	5	3	REQ	0	6	3	Next node address
+6	 --- error ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.072515', '', 'length=8', 'from=30', 'to=37']
+['10', '02', '03', '05', '00', '05', '10', '03']
+direction:  left
+length:  8
+time:  2015-06-08 13:38:21.072
+seconds:  49101.072515
+sequence:  3
+node:  5
+command:  -1
+-- message end --
+	-- Error Class Output Begin--
+	Error Data:	[5]
+	Error Number:	5
+	Error Message:	device returned error code 5: destination node address 5 rejected for sequence 3
+	-- Error Class Output Begin--
+6	5	3	ERR	5	None	None	device returned error code 5: destination node address 5 rejected for sequence 3
+7	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.080408', '', 'length=12', 'from=48', 'to=59']
+['10', '02', '04', '05', '05', '04', '01', '07', '00', '03', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:21.080
+seconds:  49101.080408
+sequence:  4
+node:  5
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 7, 0, 3]
+	Data Array: 	[1, 7, 0, 3]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 7, 0, 3]
+		Data:	[1, 7, 0, 3]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[7, 0, 3]
+			1st byte:	0000 0111
+			Chained: 	False
+			Index:   	7
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0011
+			DataType:	character
+			FbNr:    	3
+			Length:  	3
+			Human Ind:	Next node address
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+7	5	4	REQ	0	7	3	Next node address
+8	 --- error ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.093448', '', 'length=8', 'from=38', 'to=45']
+['10', '02', '04', '05', '00', '05', '10', '03']
+direction:  left
+length:  8
+time:  2015-06-08 13:38:21.093
+seconds:  49101.093448
+sequence:  4
+node:  5
+command:  -1
+-- message end --
+	-- Error Class Output Begin--
+	Error Data:	[5]
+	Error Number:	5
+	Error Message:	device returned error code 5: destination node address 5 rejected for sequence 4
+	-- Error Class Output Begin--
+8	5	4	ERR	5	None	None	device returned error code 5: destination node address 5 rejected for sequence 4
+9	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.101404', '', 'length=12', 'from=60', 'to=71']
+['10', '02', '05', '05', '05', '04', '01', '08', '00', '03', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:21.101
+seconds:  49101.101404
+sequence:  5
+node:  5
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 8, 0, 3]
+	Data Array: 	[1, 8, 0, 3]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 8, 0, 3]
+		Data:	[1, 8, 0, 3]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[8, 0, 3]
+			1st byte:	0000 1000
+			Chained: 	False
+			Index:   	8
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0011
+			DataType:	character
+			FbNr:    	3
+			Length:  	3
+			Human Ind:	Next node address
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+9	5	5	REQ	0	8	3	Next node address
+10	 --- error ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.111912', '', 'length=8', 'from=46', 'to=53']
+['10', '02', '05', '05', '00', '05', '10', '03']
+direction:  left
+length:  8
+time:  2015-06-08 13:38:21.111
+seconds:  49101.111912
+sequence:  5
+node:  5
+command:  -1
+-- message end --
+	-- Error Class Output Begin--
+	Error Data:	[5]
+	Error Number:	5
+	Error Message:	device returned error code 5: destination node address 5 rejected for sequence 5
+	-- Error Class Output Begin--
+10	5	5	ERR	5	None	None	device returned error code 5: destination node address 5 rejected for sequence 5
+11	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:21.119936', '', 'length=12', 'from=72', 'to=83']
+['10', '02', '06', '05', '05', '04', '01', '09', '00', '03', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:21.119
+seconds:  49101.119936
+sequence:  6
+node:  5
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 9, 0, 3]
+	Data Array: 	[1, 9, 0, 3]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 9, 0, 3]
+		Data:	[1, 9, 0, 3]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[9, 0, 3]
+			1st byte:	0000 1001
+			Chained: 	False
+			Index:   	9
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0011
+			DataType:	character
+			FbNr:    	3
+			Length:  	3
+			Human Ind:	Next node address
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+11	5	6	REQ	0	9	3	Next node address
+12	 --- error ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:21.132762', '', 'length=8', 'from=54', 'to=61']
+['10', '02', '06', '05', '00', '05', '10', '03']
+direction:  left
+length:  8
+time:  2015-06-08 13:38:21.132
+seconds:  49101.132762
+sequence:  6
+node:  5
+command:  -1
+-- message end --
+	-- Error Class Output Begin--
+	Error Data:	[5]
+	Error Number:	5
+	Error Message:	device returned error code 5: destination node address 5 rejected for sequence 6
+	-- Error Class Output Begin--
+12	5	6	ERR	5	None	None	device returned error code 5: destination node address 5 rejected for sequence 6
+13	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:23.156360', '', 'length=12', 'from=84', 'to=95']
+['10', '02', '07', '03', '05', '04', '01', '0a', '00', '00', '10', '03']
+direction:  right
+length:  12
+time:  2015-06-08 13:38:23.156
+seconds:  49103.15636
+sequence:  7
+node:  3
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 10, 0, 0]
+	Data Array: 	[1, 10, 0, 0]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 10, 0, 0]
+		Data:	[1, 10, 0, 0]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[10, 0, 0]
+			1st byte:	0000 1010
+			Chained: 	False
+			Index:   	10
+			2nd byte:	0000 0000
+			Process: 	0
+			3rd byte:	0000 0000
+			DataType:	character
+			FbNr:    	0
+			Length:  	3
+			Human Ind:	Identification string
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+13	3	7	REQ	0	10	0	Identification string
+14	 --- send ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:23.165303', '', 'length=11', 'from=62', 'to=72']
+['10', '02', '07', '03', '04', '02', '01', '0a', '07', '10', '03']
+direction:  left
+length:  11
+time:  2015-06-08 13:38:23.165
+seconds:  49103.165303
+sequence:  7
+node:  3
+command:  2
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 10, 7]
+	Data Array: 	[1, 10, 7]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 10, 7]
+		Data:	[1, 10, 7]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[10, 7]
+			1st byte:	0000 1010
+			Chained: 	False
+			DataType:	character
+			Index:    	10
+			2nd byte:	0000 0111
+			Length:  	2
+			Value:   	7
+			Human Ind:	Polynomial constant F
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+14	3	7	ST2	1	10	None	7
+15	 --- request ---
+-- message Class Output begin --
+['>', '2015/06/08', '13:38:23.180134', '', 'length=13', 'from=96', 'to=108']
+['10', '02', '08', '03', '06', '04', '01', '6b', '7d', '75', '08', '10', '03']
+direction:  right
+length:  13
+time:  2015-06-08 13:38:23.180
+seconds:  49103.180134
+sequence:  8
+node:  3
+command:  4
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 107, 125, 117, 8]
+	Data Array: 	[1, 107, 125, 117, 8]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 107, 125, 117, 8]
+		Data:	[1, 107, 125, 117, 8]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowRequest Class Output Begin --
+			Data:    	[107, 125, 117, 8]
+			1st byte:	0110 1011
+			Chained: 	False
+			Index:   	11
+			2nd byte:	0111 1101
+			Process: 	125
+			3rd byte:	0111 0101
+			DataType:	string
+			FbNr:    	21
+			Length:  	4
+			Human Ind:	Fieldbus
+			-- MKFlowRequest Class Output End --
+		-- MKFlowProcess Class Output End --
+	-- MKFlowData Class Output End --
+15	3	8	REQ	125	11	21	Fieldbus
+16	 --- send ---
+-- message Class Output begin --
+['<', '2015/06/08', '13:38:23.195675', '', 'length=19', 'from=73', 'to=91']
+['10', '02', '08', '03', '0c', '02', '01', '6b', '08', '4e', '6f', '42', '75', '73', '00', '02', '00', '10', '03']
+direction:  left
+length:  19
+time:  2015-06-08 13:38:23.195
+seconds:  49103.195675
+sequence:  8
+node:  3
+command:  2
+-- message end --
+	-- MKFlowData Class Output Begin --
+	Data Array: 	[1, 107, 8, 78, 111, 66, 117, 115, 0, 2, 0]
+	Data Array: 	[1, 107, 8, 78, 111, 66, 117, 115, 0, 2, 0]
+	Total Processes:	1
+	Data fully processed
+		-- MKFlowProcess Class Output Begin --
+		Data:	[1, 107, 8, 78, 111, 66, 117, 115, 0, 2, 0]
+		Data:	[1, 107, 8, 78, 111, 66, 117, 115, 0, 2, 0]
+		1st byte:	0000 0001
+		chained:	False
+		Process:	1
+		Total Parameters:  1
+			-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output Begin --
+			Data:    	[107, 8, 78, 111, 66, 117, 115, 0, 2, 0]
+			1st byte:	0110 1011
+			Chained: 	False
+			DataType:	string
+			Index:    	11
+			2nd byte:	0000 1000
+			Length:  	10
+			Value:   	NoBus
