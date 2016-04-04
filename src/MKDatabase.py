@@ -12,7 +12,7 @@ class MKDatabase(object):
     sql = ""
     data = ""
     ready = False
-    message = ""
+    messageID = -1
     hostname = ""
     recording = False
     recordingID = -1
@@ -175,6 +175,50 @@ class MKDatabase(object):
             else:
                 pass
 
+    def createMessage(self):
+        self.sql = """CREATE TABLE IF NOT EXISTS `cvd`.`runtime_message` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `ready` tinyint(4) NOT NULL DEFAULT '0',
+                `id_message` int(11) DEFAULT '0',
+
+                PRIMARY KEY (`id`)
+                ) ENGINE=MEMORY DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+        self.write()
+
+        self.sql = """CREATE TABLE IF NOT EXISTS  `cvd`.`message` (
+                `id` int(11) NOT NULL AUTO_INCREMENT,
+                `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `processed` tinyint(4) NOT NULL DEFAULT '0',
+                `text` text NOT NULL,
+                PRIMARY KEY (`id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+        self.write()
+
+    def resetMessage(self):
+        self.sql = """INSERT INTO `cvd`.`runtime_message`
+                        (`ready`)
+                    VALUES
+                        (0)"""
+        self.write()
+        self.sql = """DELETE FROM `cvd`.`message`
+                    WHERE `processed` = 1"""
+        self.write()
+
+    def writeMessage(self):
+        try:
+            self.write()
+        except:
+            try:
+                temp = self.sql
+                self.createMessage()
+                self.resetMessage()
+                self.sql = temp
+                self.write()
+            except:
+                raise
+            else:
+                pass
+
     def setSetpoint(self, temperature, pressure, argon, ethanol):
         self.sql = """UPDATE `cvd`.`runtime_arduino`
                     SET	`spTemperature` = %s,
@@ -276,34 +320,64 @@ class MKDatabase(object):
         return self.fileName
 
     def setMessage(self, message):
-        self.sql = """UPDATE `cvd`.`message`
-                SET	`text` = '%s',
-                        `ready` = 1
-                LIMIT 1;"""  % (message)
-        self.write()
+        self.sql = """INSERT INTO `cvd`.`message`
+                (`text`) VALUES ('%s');"""  % (message)
+        self.writeMessage()
+        self.updateMessage()
+
+    def updateMessage(self):
+        self.sql = """SELECT `id` FROM `cvd`.`message`
+                WHERE `processed` = 0
+                LIMIT 1;"""
+        self.read()
+        if (len(self.data) == 1):
+            id_message = self.data[0]
+            ready = 1
+        else:
+            ready = 0
+            id_message = -1
+
+        self.sql = """UPDATE `cvd`.`runtime_message`
+                SET `ready` = %i,
+                    `id_message` = %i
+                LIMIT 1;""" % (ready, id_message)
+        self.writeMessage()
 
     def isReady(self):
-        self.sql = """SELECT `ready`, `text`
-                        FROM `cvd`.`message`
-                        LIMIT 1;"""
+        if self.ready:
+            return True
+        self.sql = """SELECT `ready`, `id_message`
+                FROM `cvd`.`runtime_message`;"""
         self.read()
         if not len(self.data) == 2:
-                self.data = (0,"")
-        (self.ready, self.message) = self.data
-        return self.ready
+                self.data = (0,-1)
+        (self.ready, self.messageID) = self.data
+        if self.ready:
+            return True
+        else:
+            return False
 
     def getMessage(self):
-        if self.ready:
-            # reset message and store in class
+        self.message = ""
+        if self.isReady():
+            # get message
+            self.sql = """SELECT `text`
+                FROM `cvd`.`message`
+                WHERE `id` = %i
+                LIMIT 1;""" % self.messageID
+            self.read()
+            if (len(self.data) == 1):
+                self.message = self.data[0]
+            # mark as processed
             self.sql = """UPDATE `cvd`.`message`
-                    SET	`ready` = 0,
-                            `text` = ''
-                    LIMIT 1;"""
-            self.write()
-            self.ready = False
-            return self.message
-        else:
-            return ""
+                SET `processed` = 1
+                WHERE `id` = %i;""" % self.messageID
+            self.writeMessage()
+            # search for pending messages
+            self.updateMessage()
+        # reset readout
+        self.ready = False
+        return self.message
 
     def getAll(self):
         self.open()
@@ -316,17 +390,3 @@ class MKDatabase(object):
         self.close()
 
 #mydb = MKDatabase()
-#mydb.setMessage("test")
-#mydb.startRecording("test2")
-#print mydb.isRecording()
-#print mydb.getLogFile()
-#mydb.stopRecording()
-#print mydb.isRecording()
-#mydb.startRecording("test4")
-#print mydb.getLogFile()
-#mydb.stopRecording()
-#print mydb.isRecording()
-#mydb.setData(921,2,3,4)
-#mydb.SetSetpoint(10,20,30,40)
-#mydb.getAll()
-#print mydb.temperature
