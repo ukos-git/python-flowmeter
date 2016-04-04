@@ -16,11 +16,13 @@ class MKDatabase(object):
 	hostname = ""
 	recording = False
 	filename = ""
+
 	def __init__(self):
 		self.hostname = self.getHostname()
 		self.ip = self.getIP()
 		self.test()
 		decimal.getcontext().prec = 2
+
 	def open(self):
 		dbHost = self.getIP()
 		dbName = "cvd"
@@ -38,6 +40,7 @@ class MKDatabase(object):
 			)
 	def close(self):
 		self.db.close()
+
 	def write(self):
 		self.open()
 		self.cursor = self.db.cursor()
@@ -47,6 +50,7 @@ class MKDatabase(object):
 		except:
 			self.db.rollback()
 		self.close()
+
 	def read(self):
 		self.open()
 		self.cursor = self.db.cursor()
@@ -56,14 +60,17 @@ class MKDatabase(object):
 		else:
 			self.data = self.cursor.fetchone()
 		self.close
+
 	def test(self):
 		self.open()
 		self.sql="SELECT VERSION()"
 		self.read()
 		self.close()
 		print "MySQL version : %s " % self.data
+
 	def getHostname(self):
 		return socket.gethostname()
+
 	def isRaspberry(self):
 		if self.hostname == "":
 			self.hostname = getHostname()
@@ -71,6 +78,7 @@ class MKDatabase(object):
 			return True
 		else:
 			return False
+
 	def getIP(self):
 		if (self.hostname == "raspberrypi"):
 			self.ip = 'localhost'
@@ -81,11 +89,13 @@ class MKDatabase(object):
 				else:
 					self.ip = "132.187.77.177"
 		return self.ip
+
 	def checkIP(self):
 		if os.system("ping -c 1 -W 1 " + self.ip + " > /dev/null") == 0:
 			return True
 		else:
 			return False
+
 	def setSetpoint(self, temperature, pressure, argon, ethanol):
 		self.sql = """UPDATE `cvd`.`runtime`
 			SET	`spTemperature` = %s,
@@ -94,6 +104,7 @@ class MKDatabase(object):
 				`spArgon`	= %s
 			LIMIT 1;"""  % (temperature, pressure, ethanol, argon)
 		self.write()
+
 	def setData(self, temperature, pressure, argon, ethanol):
 		self.temperature = decimal.Decimal(temperature)
 		self.pressure = decimal.Decimal(pressure)
@@ -106,12 +117,14 @@ class MKDatabase(object):
 				`argon`		= %s
 			LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
 		self.write()
+
 	def setMessage(self, message):
 		self.sql = """UPDATE `cvd`.`message`
 			SET	`text` = '%s',
 				`ready` = 1
 			LIMIT 1;"""  % (message)
 		self.write()
+
 	def setLogFile(self, filename):
 		self.sql = """UPDATE `cvd`.`recording`
 			SET	`filename` = '%s'
@@ -119,6 +132,7 @@ class MKDatabase(object):
 			LIMIT 1;""" % (filename)
 		self.write()
 		self.filename = filename
+
 	def isReady(self):
 		self.sql = """SELECT `ready`, `text`
 				FROM `cvd`.`message`
@@ -128,6 +142,7 @@ class MKDatabase(object):
 			self.data = (0,"")
 		(self.ready, self.message) = self.data
 		return self.ready
+
 	def isRecording(self):
 		self.sql = """SELECT `recording`, `filename`
 			FROM `cvd`.`recording`
@@ -138,19 +153,23 @@ class MKDatabase(object):
 			self.data = (0,"")
 		(self.recording, self.filename) = self.data
 		return self.recording
+
 	def stopRecording(self):
 		self.sql = """UPDATE `cvd`.`recording`
 			SET	`recording` = 0
 			WHERE `recording` = 1;"""
 		self.write()
+
 	def startRecording(self, filename):
 		self.sql = """INSERT INTO `cvd`.`recording` (
 			`id` ,`time` , `recording` , `filename` )
 			VALUES (
 			NULL , CURRENT_TIMESTAMP , 1, '%s')""" % (filename)
 		self.write()
+
 	def getLogFile(self):
 		return self.filename
+
 	def getMessage(self):
 		if self.ready:
 			# reset message and store in class
@@ -163,6 +182,7 @@ class MKDatabase(object):
 			return self.message
 		else:
 			return ""
+
 	def getAll(self):
 		self.open()
 		self.sql = "SELECT temperature, pressure, ethanol, argon, spTemperature, spPressure, spEthanol, spArgon from `cvd`.`runtime` LIMIT 1"
