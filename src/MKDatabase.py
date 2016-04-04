@@ -15,7 +15,8 @@ class MKDatabase(object):
 	message = ""
 	hostname = ""
 	recording = False
-	filename = ""
+        recordingID = -1
+        fileName = ""
 
 	def __init__(self):
 		self.hostname = self.getHostname()
@@ -98,11 +99,8 @@ class MKDatabase(object):
 		else:
 			return False
 
-        def createTables(self):
-            self.createArduino()
-
         def createArduino(self):
-            self.sql = """CREATE TABLE `runtime_arduino` (
+            self.sql = """CREATE TABLE IF NOT EXISTS `runtime_arduino` (
                     `temperature` decimal(6,2) NOT NULL,
                     `pressure` decimal(6,2) NOT NULL,
                     `argon` decimal(6,2) NOT NULL,
@@ -129,6 +127,47 @@ class MKDatabase(object):
                     temp = self.sql
                     self.createArduino()
                     self.resetArduino()
+                    self.sql = temp
+                    self.write()
+                except:
+                    raise
+                else:
+                    pass
+
+	def createRecording(self):
+            self.sql = """CREATE TABLE IF NOT EXISTS `runtime_recording` (
+                    `id` int(11) NOT NULL AUTO_INCREMENT,
+                    `recording` tinyint(4) NOT NULL DEFAULT '0',
+                    `id_recording` int(11) DEFAULT '0',
+
+                    PRIMARY KEY (`id`)
+                    ) ENGINE=MEMORY DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+            self.write()
+
+            self.sql = """CREATE TABLE IF NOT EXISTS `recording` (
+                    `id` int(11) NOT NULL AUTO_INCREMENT,
+                    `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `recording` tinyint(4) NOT NULL DEFAULT '0',
+                    `filename` text NOT NULL,
+                    PRIMARY KEY (`id`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+            self.write()
+
+        def resetRecording(self):
+            self.sql = """INSERT INTO `runtime_recording`
+                            (`recording`)
+			VALUES
+                            (0)"""
+            self.write()
+
+        def writeRecording(self):
+            try:
+                self.write()
+            except:
+                try:
+                    temp = self.sql
+                    self.createRecording()
+                    self.resetRecording()
                     self.sql = temp
                     self.write()
                 except:
@@ -184,31 +223,74 @@ class MKDatabase(object):
 		return self.ready
 
 	def isRecording(self):
-		self.sql = """SELECT `recording`, `filename`
-			FROM `cvd`.`recording`
-			WHERE `recording` = 1
+		self.sql = """SELECT `recording`
+			FROM `cvd`.`runtime_recording`
 			LIMIT 1;"""
 		self.read()
-		if not len(self.data) == 2:
-			self.data = (0,"")
-		(self.recording, self.filename) = self.data
-		return self.recording
+                if not len(self.data) == 1:
+                    return False
+                else:
+                    if self.data[0]:
+                        return True
+                    else:
+                        return False
 
 	def stopRecording(self):
+		self.sql = """UPDATE `cvd`.`runtime_recording`
+			SET	`recording` = 0;"""
+		self.writeRecording()
 		self.sql = """UPDATE `cvd`.`recording`
 			SET	`recording` = 0
 			WHERE `recording` = 1;"""
-		self.write()
+                self.writeRecording()
+                self.recordingID = -1
 
 	def startRecording(self, filename):
+                self.stopRecording
+
 		self.sql = """INSERT INTO `cvd`.`recording` (
 			`id` ,`time` , `recording` , `filename` )
 			VALUES (
-			NULL , CURRENT_TIMESTAMP , 1, '%s')""" % (filename)
-		self.write()
+			NULL , CURRENT_TIMESTAMP , 1, '%s')""" % filename
+		self.writeRecording()
+                self.sql = """SELECT `id`
+			FROM `cvd`.`recording`
+			WHERE `recording` = 1
+			LIMIT 1;"""
+                self.read()
+                self.sql = """UPDATE `cvd`.`runtime_recording`
+                        SET `id_recording` = %i,
+                            `recording` = 1
+                        LIMIT 1;""" % self.data
+		self.writeRecording()
+
+        def getRecordingID(self):
+            self.sql = """SELECT `id_recording`
+			FROM `cvd`.`runtime_recording`
+			LIMIT 1;"""
+            self.read()
+            if (len(self.data) == 1):
+                return int(self.data[0])
+            else:
+                return -1
 
 	def getLogFile(self):
-		return self.filename
+            if not self.isRecording():
+                return ""
+            # get id from memory table
+            recordingID = self.getRecordingID()
+            # update filename from disc table
+            if not (recordingID == self.recordingID):
+                self.sql = """SELECT `filename`
+			FROM `cvd`.`recording`
+			WHERE `id` = %i;""" % recordingID
+                self.read()
+                if len(self.data) == 1:
+                    self.fileName = self.data[0]
+                else:
+                    self.fileName = ''
+                self.recordingID = recordingID
+            return self.fileName
 
 	def getMessage(self):
 		if self.ready:
@@ -230,13 +312,18 @@ class MKDatabase(object):
 		(self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
 		self.close()
 
-mydb = MKDatabase()
+#mydb = MKDatabase()
 #mydb.setMessage("test")
-#mydb.startRecording("test")
+#mydb.startRecording("test2")
 #print mydb.isRecording()
+#print mydb.getLogFile()
 #mydb.stopRecording()
 #print mydb.isRecording()
-mydb.setData(921,2,3,4)
+#mydb.startRecording("test4")
+#print mydb.getLogFile()
+#mydb.stopRecording()
+#print mydb.isRecording()
+#mydb.setData(921,2,3,4)
 #mydb.SetSetpoint(10,20,30,40)
-mydb.getAll()
-print mydb.temperature
+#mydb.getAll()
+#print mydb.temperature
