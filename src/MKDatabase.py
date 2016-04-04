@@ -45,11 +45,13 @@ class MKDatabase(object):
 		self.open()
 		self.cursor = self.db.cursor()
 		try:
-			self.cursor.execute(self.sql)
-			self.db.commit()
+                    self.cursor.execute(self.sql)
+                    self.db.commit()
+                    self.close()
 		except:
-			self.db.rollback()
-		self.close()
+                    self.db.rollback()
+                    self.close()
+                    raise
 
 	def read(self):
 		self.open()
@@ -96,27 +98,65 @@ class MKDatabase(object):
 		else:
 			return False
 
+        def createTables(self):
+            self.createArduino()
+
+        def createArduino(self):
+            self.sql = """CREATE TABLE `runtime_arduino` (
+                    `temperature` decimal(6,2) NOT NULL,
+                    `pressure` decimal(6,2) NOT NULL,
+                    `argon` decimal(6,2) NOT NULL,
+                    `ethanol` decimal(6,2) NOT NULL,
+                    `spTemperature` int(11) NOT NULL,
+                    `spPressure` int(11) NOT NULL,
+                    `spEthanol` int(11) NOT NULL,
+                    `spArgon` int(11) NOT NULL
+                    ) ENGINE=MEMORY DEFAULT CHARSET=latin1;"""
+            self.write()
+
+        def resetArduino(self):
+            self.sql = """INSERT INTO `runtime_arduino`
+                            (`temperature`, `pressure`, `argon`, `ethanol`, `spTemperature`, `spPressure`, `spEthanol`, `spArgon`)
+                        VALUES
+                            (23.00, 994.21, 0.00, 50.42, 0, 1000, 0, 0);"""
+            self.write()
+
+        def writeArduino(self):
+            try:
+                self.write()
+            except:
+                try:
+                    temp = self.sql
+                    self.createArduino()
+                    self.resetArduino()
+                    self.sql = temp
+                    self.write()
+                except:
+                    raise
+                else:
+                    pass
+
 	def setSetpoint(self, temperature, pressure, argon, ethanol):
-		self.sql = """UPDATE `cvd`.`runtime`
+		self.sql = """UPDATE `cvd`.`runtime_arduino`
 			SET	`spTemperature` = %s,
 				`spPressure`	= %s,
 				`spEthanol`	= %s,
 				`spArgon`	= %s
 			LIMIT 1;"""  % (temperature, pressure, ethanol, argon)
-		self.write()
+		self.writeArduino()
 
 	def setData(self, temperature, pressure, argon, ethanol):
 		self.temperature = decimal.Decimal(temperature)
 		self.pressure = decimal.Decimal(pressure)
 		self.argon = decimal.Decimal(argon)
 		self.ethanol = decimal.Decimal(ethanol)
-		self.sql = """UPDATE `cvd`.`runtime`
+		self.sql = """UPDATE `cvd`.`runtime_arduino`
 			SET	`temperature`	= %s,
 				`pressure`	= %s,
 				`ethanol`	= %s,
 				`argon`		= %s
 			LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
-		self.write()
+                self.writeArduino()
 
 	def setMessage(self, message):
 		self.sql = """UPDATE `cvd`.`message`
@@ -185,18 +225,18 @@ class MKDatabase(object):
 
 	def getAll(self):
 		self.open()
-		self.sql = "SELECT temperature, pressure, ethanol, argon, spTemperature, spPressure, spEthanol, spArgon from `cvd`.`runtime` LIMIT 1"
+		self.sql = "SELECT temperature, pressure, ethanol, argon, spTemperature, spPressure, spEthanol, spArgon from `cvd`.`runtime_arduino` LIMIT 1"
 		self.read()
 		(self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
 		self.close()
 
-#mydb = MKDatabase()
+mydb = MKDatabase()
 #mydb.setMessage("test")
 #mydb.startRecording("test")
 #print mydb.isRecording()
 #mydb.stopRecording()
 #print mydb.isRecording()
-#mydb.SetData(20,2,3,4)
+mydb.setData(921,2,3,4)
 #mydb.SetSetpoint(10,20,30,40)
-#mydb.GetAll()
-#print mydb.temperature
+mydb.getAll()
+print mydb.temperature
