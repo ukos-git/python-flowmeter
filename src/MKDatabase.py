@@ -197,30 +197,13 @@ class MKDatabase(object):
                 LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
         self.writeArduino()
 
-    def setMessage(self, message):
-        self.sql = """UPDATE `cvd`.`message`
-                SET	`text` = '%s',
-                        `ready` = 1
-                LIMIT 1;"""  % (message)
-        self.write()
-
-    def setLogFile(self, filename):
+    def setLogFile(self, fileName):
         self.sql = """UPDATE `cvd`.`recording`
                     SET	`filename` = '%s'
                     WHERE `recording` = 1
-                    LIMIT 1;""" % (filename)
+                    LIMIT 1;""" % (fileName)
         self.write()
-        self.filename = filename
-
-    def isReady(self):
-        self.sql = """SELECT `ready`, `text`
-                        FROM `cvd`.`message`
-                        LIMIT 1;"""
-        self.read()
-        if not len(self.data) == 2:
-                self.data = (0,"")
-        (self.ready, self.message) = self.data
-        return self.ready
+        self.fileName = fileName
 
     def isRecording(self):
         self.sql = """SELECT `recording`
@@ -291,6 +274,23 @@ class MKDatabase(object):
                 self.fileName = ''
             self.recordingID = recordingID
         return self.fileName
+
+    def setMessage(self, message):
+        self.sql = """UPDATE `cvd`.`message`
+                SET	`text` = '%s',
+                        `ready` = 1
+                LIMIT 1;"""  % (message)
+        self.write()
+
+    def isReady(self):
+        self.sql = """SELECT `ready`, `text`
+                        FROM `cvd`.`message`
+                        LIMIT 1;"""
+        self.read()
+        if not len(self.data) == 2:
+                self.data = (0,"")
+        (self.ready, self.message) = self.data
+        return self.ready
 
     def getMessage(self):
         if self.ready:
