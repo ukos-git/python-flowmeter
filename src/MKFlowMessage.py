@@ -838,7 +838,10 @@ class MKFlowSent(MKFlowData):
                     self.length = self.dataLength + self.dataStart
 
             def getValue(self):
-                return self.dataValue
+                if self.dataType == 'long':
+                    return self.getValueFloat()
+                else:
+                    return self.dataValue
 
             def getValueFloat(self):
                 return self.dataValueFloat
@@ -853,6 +856,4 @@ class MKFlowSent(MKFlowData):
                 print leading, '2nd byte:\t', format(self.data[1], '08b')[0:4] + ' ' + format(self.data[1], '08b')[4:8]
                 print leading, 'Length:  \t', self.getLength()
                 print leading, 'Value:   \t', self.getValue()
-                if self.dataType == 'long':
-                    print leading, 'Float:   \t', self.getValueFloat()
                 print leading, "-- MKFlowSent:MKFlowProcess:MKFlowParameter Class Output End --"
