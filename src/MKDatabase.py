@@ -18,6 +18,8 @@ class MKDatabase(object):
     recording = False
     recordingID = -1
     fileName = ""
+    storage_description = 50
+    storage_values = 30
 
     def __init__(self):
         self.hostname = self.getHostname()
@@ -147,13 +149,13 @@ class MKDatabase(object):
             `process`       smallint(2) NOT NULL,
             `flowBus`       smallint(2) NOT NULL,
             `dataType`      tinyint(1) NOT NULL,
-            `parameter`     binary(20) NOT NULL,
-            `data`          binary(10) NOT NULL,
+            `parameter`     binary(%i) NOT NULL,
+            `data`          binary(%i) NOT NULL,
             `time`          decimal(7,2) NOT NULL,
             UNIQUE KEY `instrument` (`instrument`,`process`,`flowBus`)
         )
         ENGINE=MEMORY
-        DEFAULT CHARSET=utf8;"""
+        DEFAULT CHARSET=utf8;""" % (self.storage_description, self.storage_values)
         self.write()
 
     def writeFlowbus(self):
@@ -438,11 +440,11 @@ class MKDatabase(object):
         INSERT INTO `cvd`.`runtime_flowbus`
         (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`, `parameter`)
         VALUES
-        (%i, %i, %i, %i, UNHEX(LPAD('%s',20,'0')), %.2f, UNHEX(LPAD('%s',40,'0')))""" % (instrument, process, flowBus, dataType, data[2:], time, parameterName)
+        (%i, %i, %i, %i, UNHEX(LPAD('%s',%i,'0')), %.2f, UNHEX(LPAD('%s',%i,'0')))""" % (instrument, process, flowBus, dataType, data[2:], self.storage_values * 2, time, parameterName, self.storage_description * 2)
         self.sql += """
         ON DUPLICATE KEY UPDATE
-        `data` = UNHEX(LPAD('%s',20,'0')),
-        `time` = %.2f;""" % (data[2:], time)
+        `data` = UNHEX(LPAD('%s',%i,'0')),
+        `time` = %.2f;""" % (data[2:], self.storage_values * 2, time)
         self.writeFlowbus()
 
     def getFlowbus(self, instrument, process, flowBus):
