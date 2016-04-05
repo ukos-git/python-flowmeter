@@ -4,6 +4,7 @@ import MySQLdb
 import os
 import socket
 import decimal
+import struct
 
 #cvd-client->rbBmSDP7fSKp87b5
 
@@ -109,7 +110,7 @@ class MKDatabase(object):
                 `spPressure` int(11) NOT NULL,
                 `spEthanol` int(11) NOT NULL,
                 `spArgon` int(11) NOT NULL
-                ) ENGINE=MEMORY DEFAULT CHARSET=latin1;"""
+                ) ENGINE=MEMORY DEFAULT Charset=utf8;"""
         self.write()
 
     def resetArduino(self):
@@ -134,6 +135,36 @@ class MKDatabase(object):
             else:
                 pass
 
+    def createFlowbus(self):
+        self.sql = """
+        CREATE TABLE IF NOT EXISTS `runtime_flowbus`
+        (
+            `instrument`    smallint(2) NOT NULL,
+            `process`       smallint(2) NOT NULL,
+            `flowBus`       smallint(2) NOT NULL,
+            `dataType`      tinyint(1) NOT NULL,
+            `data`          binary(10) NOT NULL,
+            `time`          decimal(7,2) NOT NULL,
+            UNIQUE KEY `instrument` (`instrument`,`process`,`flowBus`)
+        )
+        ENGINE=MEMORY
+        DEFAULT CHARSET=utf8;"""
+        self.write()
+
+    def writeFlowbus(self):
+        try:
+            self.write()
+        except:
+            try:
+                temp = self.sql
+                self.createFlowbus()
+                self.sql = temp
+                self.write()
+            except:
+                raise
+            else:
+                pass
+
     def createRecording(self):
         self.sql = """CREATE TABLE IF NOT EXISTS `runtime_recording` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -141,7 +172,7 @@ class MKDatabase(object):
                 `id_recording` int(11) DEFAULT '0',
 
                 PRIMARY KEY (`id`)
-                ) ENGINE=MEMORY DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+                ) ENGINE=MEMORY DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
         self.write()
 
         self.sql = """CREATE TABLE IF NOT EXISTS `recording` (
@@ -150,7 +181,7 @@ class MKDatabase(object):
                 `recording` tinyint(4) NOT NULL DEFAULT '0',
                 `filename` text NOT NULL,
                 PRIMARY KEY (`id`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+                ) ENGINE=InnoDB DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
         self.write()
 
     def resetRecording(self):
@@ -182,7 +213,7 @@ class MKDatabase(object):
                 `id_message` int(11) DEFAULT '0',
 
                 PRIMARY KEY (`id`)
-                ) ENGINE=MEMORY DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+                ) ENGINE=MEMORY DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
         self.write()
 
         self.sql = """CREATE TABLE IF NOT EXISTS  `cvd`.`message` (
@@ -191,7 +222,7 @@ class MKDatabase(object):
                 `processed` tinyint(4) NOT NULL DEFAULT '0',
                 `text` text NOT NULL,
                 PRIMARY KEY (`id`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=40;"""
+                ) ENGINE=InnoDB DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
         self.write()
 
     def resetMessage(self):
@@ -379,6 +410,36 @@ class MKDatabase(object):
         self.ready = False
         return self.message
 
+    def setFlowbus(self, instrument, process, flowBus, dataTypeString, dataInput, timeInput):
+        time = decimal.Decimal(timeInput)
+        if (dataTypeString == "character"):
+            dataType = 0
+            data = hex(int(dataInput))
+        elif(dataTypeString == "integer"):
+            dataType = 1
+            data = hex(int(dataInput))
+        elif(dataTypeString == "long"): # also handles float
+            dataType = 2
+            data = hex(struct.unpack('<I', struct.pack('<f', float(dataInput)))[0])
+        elif(dataTypeString == "string"):
+            dataType = 3
+            data = '0x' + dataInput.encode("hex")
+        else:
+            data = 0
+            dataType = 128
+
+        self.sql = """
+        INSERT INTO `cvd`.`runtime_flowbus`
+        (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`)
+        VALUES
+        (%i, %i, %i, %i, %s, %.2f)""" % (instrument, process, flowBus, dataType, data, time)
+        self.sql += """
+        ON DUPLICATE KEY UPDATE
+        `data` = %s,
+        `time` = %.2f;""" % (data, time)
+        print self.sql
+        self.writeFlowbus()
+
     def getAll(self):
         self.open()
         self.sql = """SELECT temperature, pressure, ethanol, argon,
@@ -389,4 +450,9 @@ class MKDatabase(object):
         (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
         self.close()
 
-#mydb = MKDatabase()
+mydb = MKDatabase()
+#mydb.setFlowbus(instrument, process, flowBus, dataTypeString, dataInput, time)
+mydb.setFlowbus(0, 1, 0, "integer", 1, 4.56)
+mydb.setFlowbus(0, 1, 1, "long", 1.1, 4.56)
+mydb.setFlowbus(0, 1, 2, "string", "mystring", 4.56)
+mydb.setFlowbus(0, 1, 3, "character", 1, 4.56)
