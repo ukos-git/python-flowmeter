@@ -430,8 +430,7 @@ class MKDatabase(object):
             dataType = 3
             data = '0x' + dataInput.encode("hex")
         else:
-            data = 0
-            dataType = 128
+            raise ValueError("can not identify dataType at setFlowBus")
 
         self.sql = """
         INSERT INTO `cvd`.`runtime_flowbus`
