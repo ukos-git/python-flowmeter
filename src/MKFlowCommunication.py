@@ -216,8 +216,9 @@ class MKFlowSequence():
                         value = Parameter.getValue()
                         dataType = Parameter.getDataType()
                         time = self.time
+                        parameter = Parameter.getName()
                         self.reset()
-                        return (valid, proc, fbnr, value, dataType, time)
+                        return (valid, proc, fbnr, value, dataType, time, parameter)
                 except:
                     self.stdout()
                     raise ValueError("error storing parameter")

@@ -147,6 +147,7 @@ class MKDatabase(object):
             `process`       smallint(2) NOT NULL,
             `flowBus`       smallint(2) NOT NULL,
             `dataType`      tinyint(1) NOT NULL,
+            `parameter`     binary(20) NOT NULL,
             `data`          binary(10) NOT NULL,
             `time`          decimal(7,2) NOT NULL,
             UNIQUE KEY `instrument` (`instrument`,`process`,`flowBus`)
@@ -415,8 +416,9 @@ class MKDatabase(object):
         self.ready = False
         return self.message
 
-    def setFlowbus(self, instrument, process, flowBus, dataTypeString, dataInput, timeInput):
+    def setFlowbus(self, instrument, process, flowBus, dataTypeString, dataInput, timeInput, parameterName):
         time = decimal.Decimal(timeInput)
+        parameterName = parameterName.encode("hex")
         if (dataTypeString == "character"):
             dataType = 0
             data = hex(int(dataInput))
@@ -434,9 +436,9 @@ class MKDatabase(object):
 
         self.sql = """
         INSERT INTO `cvd`.`runtime_flowbus`
-        (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`)
+        (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`, `parameter`)
         VALUES
-        (%i, %i, %i, %i, UNHEX(LPAD('%s',20,'0')), %.2f)""" % (instrument, process, flowBus, dataType, data[2:], time)
+        (%i, %i, %i, %i, UNHEX(LPAD('%s',20,'0')), %.2f, UNHEX(LPAD('%s',40,'0')))""" % (instrument, process, flowBus, dataType, data[2:], time, parameterName)
         self.sql += """
         ON DUPLICATE KEY UPDATE
         `data` = UNHEX(LPAD('%s',20,'0')),
@@ -445,7 +447,7 @@ class MKDatabase(object):
 
     def getFlowbus(self, instrument, process, flowBus):
         self.sql = """
-        SELECT `dataType`,TRIM(LEADING '0' FROM HEX(`data`)),`time`
+        SELECT `dataType`,TRIM(LEADING '0' FROM HEX(`data`)),`time`,TRIM(LEADING '0' FROM HEX(`parameter`))
         FROM `cvd`.`runtime_flowbus`
         WHERE
         (   `instrument`    = %i
@@ -453,12 +455,12 @@ class MKDatabase(object):
         AND `flowBus`       = %i);
         """ % (instrument, process, flowBus)
         self.read()
-        if (len(self.data) == 3):
-            (dataType, dataOut, timeOut) = self.data
+        if (len(self.data) == 4):
+            (dataType, dataOut, timeOut, parameter) = self.data
         else:
-            (dataType, dataOut, timeOut) = (0,0,0)
             raise
 
+        parameter = parameter.decode("hex")
         time = decimal.Decimal(timeOut)
         if (dataType == 0):
             data = int(dataOut, 16)
@@ -472,7 +474,7 @@ class MKDatabase(object):
             data = 0
             raise
 
-        return (data, time)
+        return (parameter, data, time)
 
     def getAll(self):
         self.open()

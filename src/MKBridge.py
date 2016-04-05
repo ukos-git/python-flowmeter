@@ -40,9 +40,10 @@ def main():
                     # store if two messages are present in current Entity
                     # reset Entity afterwards.
                     try:
-                        #Entity.output()
-                        (valid, proc, fbnr, value, dataType, time) = Entity.readOut()
-                        Database.setFlowbus(0, proc, fbnr, dataType, value, time)
+                        Entity.output()
+                        (valid, proc, fbnr, value, dataType, time, parameter) = Entity.readOut()
+                        Database.setFlowbus(0, proc, fbnr, dataType, value, time, parameter)
+                        print Database.getFlowbus(0, proc, fbnr)
                     except ValueError:
                         pass
                     except:
