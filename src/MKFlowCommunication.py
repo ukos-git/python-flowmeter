@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import MKDatabase
 # Main Class
 class MKFlowCommunication():
     def __init__(self):
@@ -145,12 +146,14 @@ class MKFlowSequence():
                     self.Parameter(process.getProcess(), parameter.getIndex()).setLength(parameter.getLength())
                     if self.RequestHasValue:
                         self.Parameter(process.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(process.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Process Answer
             if not self.RequestHasValue and not self.isStatus and not self.isError:
                 for process in self.Answer.process:
                     for parameter in process.Parameter:
                         self.Parameter(process.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(process.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Answer with Status or Error and set valid
             self.valid = True
@@ -202,9 +205,8 @@ class MKFlowSequence():
                 except:
                     self.stdout()
                     raise ValueError("error in MKFlowModbusClass output")
-            self.reset()
 
-    def store(self):
+    def readOut(self):
         if self.check():
             if not self.isAnalysed:
                 self.analyse()
@@ -213,16 +215,20 @@ class MKFlowSequence():
                 Parameter = self.getParameter(process, index)
                 try:
                     if not Parameter.isInvalid():
+                        valid = True
                         proc = process
                         fbnr = Parameter.getNumber()
                         name = Parameter.getName()
                         value = Parameter.getValue()
+                        dataType = Parameter.getDataType()
                         time = self.time
-                        print time, name, value
+                        self.reset()
+                        return (valid, proc, fbnr, value, dataType, time)
                 except:
                     self.stdout()
                     raise ValueError("error storing parameter")
             self.reset()
+        raise ValueError("Nothing to do")
 
     def stdout(self):
         print "--- sequence: %i ---" % self.sequence
@@ -243,6 +249,7 @@ class MKFlowModbus():
         self.error = ''
         self.value = None
         self.human = ''
+        self.dataType = '' # readybility. store as string
         self.length = 0
 
     def setNumber(self, number):
@@ -256,6 +263,12 @@ class MKFlowModbus():
 
     def getValue(self):
         return self.value
+
+    def setDataType(self, dataType):
+        self.dataType = dataType
+
+    def getDataType(self):
+        return self.dataType
 
     def setName(self, string):
         self.human = string

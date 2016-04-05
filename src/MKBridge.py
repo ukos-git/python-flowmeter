@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 from MKFlowInput import MKFlowInput
 from MKFlowCommunication import MKFlowCommunication
+from MKDatabase import MKDatabase
 
 def main():
     Input = MKFlowInput()
     Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
     Storage = MKFlowCommunication()
+    Database = MKDatabase()
     while Input.isAlive():
         try:
             Message = Input.getMessage()
@@ -37,7 +39,14 @@ def main():
                 else:
                     # store if two messages are present in current Entity
                     # reset Entity afterwards.
-                    Entity.store()
+                    try:
+                        #Entity.output()
+                        (valid, proc, fbnr, value, dataType, time) = Entity.readOut()
+                        Database.setFlowbus(0, proc, fbnr, dataType, value, time)
+                    except ValueError:
+                        pass
+                    except:
+                        raise
             else:
                 print "--- invalid ---"
                 SubMessage.stdoutShort(Message.stdoutShort())
