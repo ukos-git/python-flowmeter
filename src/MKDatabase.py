@@ -56,14 +56,18 @@ class MKDatabase(object):
             raise
 
     def read(self):
-        self.open()
-        self.cursor = self.db.cursor()
-        self.cursor.execute(self.sql)
-        if not self.cursor.rowcount:
-            self.data = ""
-        else:
-            self.data = self.cursor.fetchone()
-        self.close
+        try:
+            self.open()
+            self.cursor = self.db.cursor()
+            self.cursor.execute(self.sql)
+            if not self.cursor.rowcount:
+                self.data = ""
+            else:
+                self.data = self.cursor.fetchone()
+            self.close
+        except:
+            print self.sql
+            raise
 
     def test(self):
         self.open()
@@ -161,6 +165,7 @@ class MKDatabase(object):
                 self.sql = temp
                 self.write()
             except:
+                print self.sql
                 raise
             else:
                 pass
@@ -432,13 +437,43 @@ class MKDatabase(object):
         INSERT INTO `cvd`.`runtime_flowbus`
         (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`)
         VALUES
-        (%i, %i, %i, %i, %s, %.2f)""" % (instrument, process, flowBus, dataType, data, time)
+        (%i, %i, %i, %i, UNHEX(LPAD('%s',20,'0')), %.2f)""" % (instrument, process, flowBus, dataType, data[2:], time)
         self.sql += """
         ON DUPLICATE KEY UPDATE
-        `data` = %s,
-        `time` = %.2f;""" % (data, time)
-        print self.sql
+        `data` = UNHEX(LPAD('%s',20,'0')),
+        `time` = %.2f;""" % (data[2:], time)
         self.writeFlowbus()
+
+    def getFlowbus(self, instrument, process, flowBus):
+        self.sql = """
+        SELECT `dataType`,TRIM(LEADING '0' FROM HEX(`data`)),`time`
+        FROM `cvd`.`runtime_flowbus`
+        WHERE
+        (   `instrument`    = %i
+        AND `process`       = %i
+        AND `flowBus`       = %i);
+        """ % (instrument, process, flowBus)
+        self.read()
+        if (len(self.data) == 3):
+            (dataType, dataOut, timeOut) = self.data
+        else:
+            (dataType, dataOut, timeOut) = (0,0,0)
+            raise
+
+        time = decimal.Decimal(timeOut)
+        if (dataType == 0):
+            data = int(dataOut, 16)
+        elif(dataType == 1):
+            data = int(dataOut, 16)
+        elif(dataType == 2): # only handles float
+            data = struct.unpack(">f", struct.pack(">I",int(dataOut,16)))[0]
+        elif(dataType == 3):
+            data = dataOut.decode("hex")
+        else:
+            data = 0
+            raise
+
+        return (data, time)
 
     def getAll(self):
         self.open()
@@ -450,9 +485,3 @@ class MKDatabase(object):
         (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
         self.close()
 
-mydb = MKDatabase()
-#mydb.setFlowbus(instrument, process, flowBus, dataTypeString, dataInput, time)
-mydb.setFlowbus(0, 1, 0, "integer", 1, 4.56)
-mydb.setFlowbus(0, 1, 1, "long", 1.1, 4.56)
-mydb.setFlowbus(0, 1, 2, "string", "mystring", 4.56)
-mydb.setFlowbus(0, 1, 3, "character", 1, 4.56)
