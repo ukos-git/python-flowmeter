@@ -141,19 +141,19 @@ class MKFlowSequence():
             # Process Request
             for process in self.Request.process:
                 for parameter in process.Parameter:
-                    self.Parameter(process.getProcess(), parameter.getIndex()).setNumber(parameter.getNumber())
-                    self.Parameter(process.getProcess(), parameter.getIndex()).setName(parameter.getHuman())
-                    self.Parameter(process.getProcess(), parameter.getIndex()).setLength(parameter.getLength())
+                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setNumber(parameter.getNumber())
+                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setName(parameter.getHuman())
+                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setLength(parameter.getLength())
                     if self.RequestHasValue:
-                        self.Parameter(process.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
-                        self.Parameter(process.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
+                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(paramter.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Process Answer
             if not self.RequestHasValue and not self.isStatus and not self.isError:
                 for process in self.Answer.process:
                     for parameter in process.Parameter:
-                        self.Parameter(process.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
-                        self.Parameter(process.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
+                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Answer with Status or Error and set valid
             self.valid = True
