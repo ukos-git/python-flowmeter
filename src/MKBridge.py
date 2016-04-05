@@ -40,7 +40,7 @@ def main():
                     # store if two messages are present in current Entity
                     # reset Entity afterwards.
                     try:
-                        Entity.output()
+                        #Entity.output()
                         Entity.save(Database)
                     except ValueError:
                         pass
