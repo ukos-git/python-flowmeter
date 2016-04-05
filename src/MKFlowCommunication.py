@@ -65,7 +65,7 @@ class MKFlowNode():
 class MKFlowSequence():
     def __init__(self, sequence):
         self.sequence = sequence
-        self.nullChild = MKFlowModbus(-1, -1)
+        self.nullChild = MKFlowModbus(-1)
         self.reset()
 
     def reset(self):
@@ -111,49 +111,47 @@ class MKFlowSequence():
         else:
             return False
 
-    def addParameter(self, process, index):
-        if not self.isParameter(process, index):
-            self.parameter_ids += [self.createID(process, index)]
-            Parameter = MKFlowModbus(process, index)
+    def addParameter(self, index):
+        if not self.isParameter(index):
+            self.parameter_ids += [index]
+            Parameter = MKFlowModbus(index)
             self.parameters += [Parameter]
 
-    def isParameter(self, process, index):
-        return (self.createID(process, index) in self.parameter_ids)
+    def isParameter(self, index):
+        return index in self.parameter_ids
 
-    def createID(self, process, index):
-        return ":".join(str(i) for i in [process, index])
-
-    def getParameter(self, process, index):
-        if self.isParameter(process, index):
-            id = self.parameter_ids.index(self.createID(process, index))
+    def getParameter(self, index):
+        if self.isParameter(index):
+            id = self.parameter_ids.index(index)
             Parameter = self.parameters[id]
             return Parameter
         else:
             return self.nullChild
 
-    def Parameter(self, process, index):
-        if not self.isParameter(process, index):
-            self.addParameter(process, index)
-        return self.getParameter(process, index)
+    def Parameter(self, index):
+        if not self.isParameter(index):
+            self.addParameter(index)
+        return self.getParameter(index)
 
     def analyse(self):
         if self.check():
             # Process Request
             for process in self.Request.process:
                 for parameter in process.Parameter:
-                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setNumber(parameter.getNumber())
-                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setName(parameter.getHuman())
-                    self.Parameter(parameter.getProcess(), parameter.getIndex()).setLength(parameter.getLength())
+                    self.Parameter(parameter.getIndex()).setNumber(parameter.getNumber())
+                    self.Parameter(parameter.getIndex()).setProcess(parameter.getProcess())
+                    self.Parameter(parameter.getIndex()).setName(parameter.getHuman())
+                    self.Parameter(parameter.getIndex()).setLength(parameter.getLength())
                     if self.RequestHasValue:
-                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
-                        self.Parameter(paramter.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
+                        self.Parameter(parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Process Answer
             if not self.RequestHasValue and not self.isStatus and not self.isError:
                 for process in self.Answer.process:
                     for parameter in process.Parameter:
-                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setValue(parameter.getValue())
-                        self.Parameter(parameter.getProcess(), parameter.getIndex()).setDataType(parameter.getDataType())
+                        self.Parameter(parameter.getIndex()).setValue(parameter.getValue())
+                        self.Parameter(parameter.getIndex()).setDataType(parameter.getDataType())
 
             # Answer with Status or Error and set valid
             self.valid = True
@@ -170,9 +168,8 @@ class MKFlowSequence():
                 # Parameter Error
                 where = self.Answer.getIndex()
                 count = 4
-                for parameter_id in self.parameter_ids:
-                    [process, index] = [int(i) for i in parameter_id.split(":")]
-                    Parameter = self.getParameter(process, index)
+                for index in self.parameter_ids:
+                    Parameter = self.getParameter(index)
                     if not self.RequestHasValue:
                         Parameter.setInvalid()
                     if where == count:
@@ -188,18 +185,16 @@ class MKFlowSequence():
             self.error = self.Answer.getText()
             self.valid = False
         if not self.valid:
-            for parameter_id in self.parameter_ids:
-                [process, index] = [int(i) for i in parameter_id.split(":")]
-                Parameter = self.getParameter(process, index)
+            for index in self.parameter_ids:
+                Parameter = self.getParameter(index)
                 Parameter.setError(self.error)
 
     def output(self):
         if self.check():
             if not self.isAnalysed:
                 self.analyse()
-            for parameter_id in self.parameter_ids:
-                [process, index] = [int(i) for i in parameter_id.split(":")]
-                Parameter = self.getParameter(process, index)
+            for index in self.parameter_ids:
+                Parameter = self.getParameter(index)
                 try:
                     Parameter.stdout()
                 except:
@@ -210,13 +205,12 @@ class MKFlowSequence():
         if self.check():
             if not self.isAnalysed:
                 self.analyse()
-            for parameter_id in self.parameter_ids:
-                [process, index] = [int(i) for i in parameter_id.split(":")]
-                Parameter = self.getParameter(process, index)
+            for index in self.parameter_ids:
+                Parameter = self.getParameter(index)
                 try:
                     if not Parameter.isInvalid():
                         valid = True
-                        proc = process
+                        proc = Parameter.getProcess()
                         fbnr = Parameter.getNumber()
                         name = Parameter.getName()
                         value = Parameter.getValue()
@@ -242,15 +236,20 @@ class MKFlowSequence():
 
 
 class MKFlowModbus():
-    def __init__(self, process, index):
-        self.process = process
+    def __init__(self, index):
         self.index = index
         self.invalid = False
         self.error = ''
         self.value = None
         self.human = ''
-        self.dataType = '' # readybility. store as string
+        self.dataType = 'invalid' # readybility. store as string
         self.length = 0
+
+    def setProcess(self, process):
+        self.process = process
+
+    def getProcess(self):
+        return self.process
 
     def setNumber(self, number):
         self.number = number
