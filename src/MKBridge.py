@@ -41,9 +41,7 @@ def main():
                     # reset Entity afterwards.
                     try:
                         Entity.output()
-                        (valid, proc, fbnr, value, dataType, time, parameter) = Entity.readOut()
-                        Database.setFlowbus(0, proc, fbnr, dataType, value, time, parameter)
-                        print Database.getFlowbus(0, proc, fbnr)
+                        Entity.save(Database)
                     except ValueError:
                         pass
                     except:

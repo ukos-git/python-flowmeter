@@ -201,7 +201,7 @@ class MKFlowSequence():
                     self.stdout()
                     raise ValueError("error in MKFlowModbusClass output")
 
-    def readOut(self):
+    def save(self, Database, instrument = 0):
         if self.check():
             if not self.isAnalysed:
                 self.analyse()
@@ -217,13 +217,11 @@ class MKFlowSequence():
                         dataType = Parameter.getDataType()
                         time = self.time
                         parameter = Parameter.getName()
-                        self.reset()
-                        return (valid, proc, fbnr, value, dataType, time, parameter)
+                        Database.setFlowbus(instrument, proc, fbnr, dataType, value, time, parameter)
                 except:
                     self.stdout()
                     raise ValueError("error storing parameter")
             self.reset()
-        raise ValueError("Nothing to do")
 
     def stdout(self):
         print "--- sequence: %i ---" % self.sequence
