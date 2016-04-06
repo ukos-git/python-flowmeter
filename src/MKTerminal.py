@@ -13,9 +13,9 @@ class MKConsole(object):
     def __init__(self):
         self.fd = sys.stdin.fileno()
 
-        def getkey(self):
-            c = os.read(self.fd, 1)
-                return c
+    def getkey(self):
+        c = os.read(self.fd, 1)
+        return c
 
 class MKTerminal(object):
     EXITCHARCTER = 'q'
