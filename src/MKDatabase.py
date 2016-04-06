@@ -68,7 +68,6 @@ class MKDatabase(object):
                 self.data = self.cursor.fetchone()
             self.close
         except:
-            print self.sql
             raise
 
     def test(self):
@@ -292,7 +291,10 @@ class MKDatabase(object):
         self.sql = """SELECT `recording`
                     FROM `cvd`.`runtime_recording`
                     LIMIT 1;"""
-        self.read()
+        try:
+            self.read()
+        except:
+            return False
         if not len(self.data) == 1:
             return False
         else:
@@ -387,7 +389,10 @@ class MKDatabase(object):
             return True
         self.sql = """SELECT `ready`, `id_message`
                 FROM `cvd`.`runtime_message`;"""
-        self.read()
+        try:
+            self.read()
+        except:
+            return False
         if not len(self.data) == 2:
                 self.data = (0,-1)
         (self.ready, self.messageID) = self.data
