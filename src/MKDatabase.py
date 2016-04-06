@@ -107,14 +107,14 @@ class MKDatabase(object):
 
     def createArduino(self):
         self.sql = """CREATE TABLE IF NOT EXISTS `runtime_arduino` (
-                `temperature` decimal(6,2) NOT NULL,
-                `pressure` decimal(6,2) NOT NULL,
-                `argon` decimal(6,2) NOT NULL,
-                `ethanol` decimal(6,2) NOT NULL,
-                `spTemperature` int(11) NOT NULL,
-                `spPressure` int(11) NOT NULL,
-                `spEthanol` int(11) NOT NULL,
-                `spArgon` int(11) NOT NULL
+                `temperature` decimal(6,2) NOT NULL DEFAULT '0',
+                `pressure` decimal(6,2) NOT NULL DEFAULT '0',
+                `argon` decimal(6,2) NOT NULL DEFAULT '0',
+                `ethanol` decimal(6,2) NOT NULL DEFAULT '0',
+                `spTemperature` int(11) NOT NULL DEFAULT '0',
+                `spPressure` int(11) NOT NULL DEFAULT '1000',
+                `spEthanol` int(11) NOT NULL DEFAULT '0',
+                `spArgon` int(11) NOT NULL DEFAULT '0'
                 ) ENGINE=MEMORY DEFAULT Charset=utf8;"""
         self.write()
 
@@ -122,7 +122,7 @@ class MKDatabase(object):
         self.sql = """INSERT INTO `runtime_arduino`
                         (`temperature`, `pressure`, `argon`, `ethanol`, `spTemperature`, `spPressure`, `spEthanol`, `spArgon`)
                     VALUES
-                        (23.00, 994.21, 0.00, 50.42, 0, 1000, 0, 0);"""
+                        (0, 0, 0, 0, 0, 0, 0, 0);"""
         self.write()
 
     def writeArduino(self):
@@ -136,6 +136,7 @@ class MKDatabase(object):
                 self.sql = temp
                 self.write()
             except:
+                print self.sql
                 raise
             else:
                 pass
@@ -144,13 +145,13 @@ class MKDatabase(object):
         self.sql = """
         CREATE TABLE IF NOT EXISTS `runtime_flowbus`
         (
-            `instrument`    smallint(2) NOT NULL,
+            `instrument`    smallint(2) NOT NULL DEFAULT '0',
             `process`       smallint(2) NOT NULL,
             `flowBus`       smallint(2) NOT NULL,
-            `dataType`      tinyint(1) NOT NULL,
-            `parameter`     binary(%i) NOT NULL,
-            `data`          binary(%i) NOT NULL,
-            `time`          decimal(7,2) NOT NULL,
+            `dataType`      tinyint(1) NOT NULL DEFAULT '0',
+            `parameter`     binary(%i) NOT NULL DEFAULT '0',
+            `data`          binary(%i) NOT NULL DEFAULT '0',
+            `time`          decimal(7,2) NOT NULL DEFAULT '0',
             UNIQUE KEY `instrument` (`instrument`,`process`,`flowBus`)
         )
         ENGINE=MEMORY
