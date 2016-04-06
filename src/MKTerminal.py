@@ -53,35 +53,34 @@ class MKTerminal(object):
 	def read(self):
 		while self.alive:
 			try:
-				b = self.Console.getkey()
-			except KeyboardInterrupt:
-				# b = serial.to_bytes([3])
-				self.stop()
-			c = character(b)
-			if c == self.EXITCHARCTER:
-				self.stop()
-			else:
-				self.send(c)
-			if self.echo == True:
-				sys.stdout.write(c)
-				sys.stdout.flush()
-		time.sleep(0.1)
-	def write(self):
-		while self.alive:
-			if self.readyToDisplay:
-				sys.stdout.write(self.printme)
-				sys.stdout.flush()
-				self.readyToDisplay=False
-			time.sleep(0.1)
+                            time.sleep(0.1)
+                            b = self.Console.getkey()
+                            c = character(b)
+                            if c == self.EXITCHARCTER:
+                                raise KeyboardInterrupt
+                            self.send(c)
+                            if self.echo == True:
+                                sys.stdout.write(c)
+                                sys.stdout.flush()
+                        except KeyboardInterrupt:
+                                self.stop()
 
-	def isAlive(self):
-		return self.alive
+        def write(self):
+                while self.alive:
+                        if self.readyToDisplay:
+                                sys.stdout.write(self.printme)
+                                sys.stdout.flush()
+                                self.readyToDisplay=False
+                        time.sleep(0.1)
 
-	def isReady(self):
-		return self.readyToSend
+        def isAlive(self):
+                return self.alive
 
-	def getMessage(self):
-		message=self.message
+        def isReady(self):
+                return self.readyToSend
+
+        def getMessage(self):
+                message=self.message
 		self.message=''
 		self.readyToSend=False
 		return message
