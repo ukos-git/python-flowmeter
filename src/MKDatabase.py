@@ -314,7 +314,7 @@ class MKDatabase(object):
         self.writeRecording()
         self.recordingID = -1
 
-    def startRecording(self, filename):
+    def startRecording(self, filename = ''):
         self.stopRecording
 
         self.sql = """INSERT INTO `cvd`.`recording` (
@@ -348,8 +348,8 @@ class MKDatabase(object):
             return ""
         # get id from memory table
         recordingID = self.getRecordingID()
-        # update filename from disc table
-        if not (recordingID == self.recordingID):
+        # update filename from disc table if not already saved in class
+        if not (recordingID == self.recordingID) or len(self.fileName) == 0:
             self.sql = """SELECT `filename`
                     FROM `cvd`.`recording`
                     WHERE `id` = %i;""" % recordingID

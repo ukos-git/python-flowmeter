@@ -138,7 +138,7 @@ class swntReactorGUI(object):
 			self.db.stopRecording()
 			self.filename.set("")
 		else:
-			self.db.startRecording('dummy')
+			self.db.startRecording()
 	def geometryToggle(self,event=None):
 		# event will be filled with Tkinter.Event when Key is Pressed. 
 		# save old geom.
