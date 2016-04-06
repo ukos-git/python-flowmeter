@@ -23,11 +23,11 @@ class MKTerminal(object):
 	alive=False
 	readyToSend=False
 	readyToDisplay=False
-	
+
 	def __init__(self,echo=False):
 		self.echo = echo
 		self.Console = MKConsole()
-		
+
 	def start(self):
 		self.alive = True
 		self.readerthread = threading.Thread(target=self.read)
@@ -39,17 +39,17 @@ class MKTerminal(object):
 
 	def join(self):
 		self.readerthread.join()
-		
+
 	def stop(self):
 		self.alive = False
 
-		
+
 	def send(self,myChar):
 		if myChar == '\n':
 			self.readyToSend=True
 		else:
 			self.message+=myChar
-						
+
 	def read(self):
 		while self.alive:
 			try:
@@ -58,11 +58,11 @@ class MKTerminal(object):
 				# b = serial.to_bytes([3])
 				self.stop()
 			c = character(b)
-			if c == self.EXITCHARCTER: 
+			if c == self.EXITCHARCTER:
 				self.stop()
 			else:
 				self.send(c)
-			if self.echo == True:				
+			if self.echo == True:
 				sys.stdout.write(c)
 				sys.stdout.flush()
 		time.sleep(0.1)
@@ -73,19 +73,19 @@ class MKTerminal(object):
 				sys.stdout.flush()
 				self.readyToDisplay=False
 			time.sleep(0.1)
-				
+
 	def isAlive(self):
 		return self.alive
-		
+
 	def isReady(self):
 		return self.readyToSend
-		
+
 	def getMessage(self):
 		message=self.message
 		self.message=''
 		self.readyToSend=False
 		return message
-	
+
 	def display(self,text):
 		self.readyToDisplay=True
 		self.printme=text
