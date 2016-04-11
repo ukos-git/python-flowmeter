@@ -62,7 +62,7 @@ class MKSerial:
             sys.exit(1)
 
     def start(self):
-        self.error.write('stopping thread')
+        self.error.write('starting thread')
         try:
             self.alive = True
             self.thread = threading.Thread(target=self.infiniteloop)
@@ -102,7 +102,7 @@ class MKSerial:
         self.run.write(val)
 
     def write(self):
-        if not self.sendBuffer == '':
+        if len(self.sendBuffer) > 0 and self.isAlive():
             self.error.write('sending message ' + self.sendBuffer)
             try:
                 self.serial.write(self.sendBuffer)
