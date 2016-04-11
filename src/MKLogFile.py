@@ -38,11 +38,11 @@ class MKLogFileHandler:
 			self.timestamp_short = True
 		elif log_type ==  'log':
 			self.logfile = self.path_general + self.path_log + self.path + self.file_log
-			self.openmode='a'
+			self.openmode='w'
 			self.timestamp_short = True
 		elif log_type ==  'error':
 			self.logfile 	= self.path_general + self.path_run + self.path + self.file_error
-			self.openmode	= 'a' #open todays log file to add content
+			self.openmode	= 'w' #open todays log file to add content
 			self.separator	= ':\t'
 			self.newline	= '\n'
 
