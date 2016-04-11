@@ -95,6 +95,8 @@ class MKDatabase(object):
             while self.checkIP() == False:
                 if self.ip == "132.187.77.177":
                     self.ip = "132.187.77.184"
+                elif self.ip == "132.187.77.184":
+                    self.ip = "132.187.77.181"
                 else:
                     self.ip = "132.187.77.177"
             return self.ip
