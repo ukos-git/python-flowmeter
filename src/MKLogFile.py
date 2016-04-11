@@ -12,18 +12,18 @@ class MKLogFileHandler:
 	path_log	= '/log'
 	path_run	= '/run'
 	path		= '/'
-	
+
 	file_run	= '_runtime.log'
 	file_log	= '_dummyTIME.log'
 	file_error	= '_error.log'
-	
+
 	ready = False
 	separator	= '\t'
 	newline		= ''
 	timestamp_short = False
-	
+
 	error_message = ''
-	
+
 	def __init__(self,path = '',log_type = 'error', fulldate = False):
 		self.path = '/' + path
 		# update date
@@ -41,15 +41,15 @@ class MKLogFileHandler:
 			self.openmode='w'
 			self.timestamp_short = True
 		elif log_type ==  'error':
-			self.logfile 	= self.path_general + self.path_run + self.path + self.file_error
+			self.logfile    = self.path_general + self.path_run + self.path + self.file_error
 			self.openmode	= 'w' #open todays log file to add content
 			self.separator	= ':\t'
 			self.newline	= '\n'
 
-		
+
 	def open(self):
 		try:
-			self.fso = open(self.logfile, self.openmode) 
+			self.fso = open(self.logfile, self.openmode)
 		except:
 			self.error_message = 'cannot open log file at ' + self.logfile
 			raise
@@ -57,7 +57,7 @@ class MKLogFileHandler:
 			self.fso.close()
 		except:
 			self.error_message = 'cannot close log file at ' + self.logfile
-			raise			
+			raise
 		else:
 			self.ready=True
 
