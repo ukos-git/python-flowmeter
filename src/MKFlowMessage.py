@@ -4,16 +4,15 @@ import sys                          # used to get line number of error print sys
 import struct                       # used to convert bin-->float
 
 class MKFlowMessage():
-    def __init__(self, message1, message2):
-        self.message1 = message1
-        self.message2 = message2
+    def __init__(self):
         self.clear()
-        self.resetSubType()
-        self.analyse()
 
-    def reprocess(self, message1, message2):
-        self.message1 = message1
-        self.message2 = message2
+    # input binary message and socat headline
+    def process(self, message, socat = ''):
+        self.message1 = message
+        self.message2 = socat
+        if (len(socat) == 0):
+            self.setLength(len(message))
         self.resetSubType()
         self.analyse()
 

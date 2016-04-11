@@ -44,12 +44,13 @@ class MKFlowInput():
             message2 = ''
             counter = 0
             while self.readOut() and counter < 100:
-                Message = self.Message(self.message1, self.message2)
+                Message = self.Message()
+                Message.process(self.message1, self.message2)
                 if Message.isInvalid:
                     counter += Message.getLength()
                     Message.setLength(counter)
                     message2 += self.message2
-                    Message.reprocess(self.message1, message2)
+                    Message.process(self.message1, message2)
                 if not Message.isInvalid:
                     return Message
             if counter == 99:
