@@ -134,3 +134,4 @@ class MKSerial:
         self.receiveBuffer=''
         self.ready=False
         return text
+
