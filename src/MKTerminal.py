@@ -52,7 +52,6 @@ class MKTerminal(object):
     def read(self):
         while self.alive:
             try:
-                time.sleep(0.1)
                 b = self.Console.getkey()
                 c = character(b)
                 if c == self.EXITCHARCTER:
@@ -61,6 +60,7 @@ class MKTerminal(object):
                 if self.echo == True:
                     sys.stdout.write(c)
                     sys.stdout.flush()
+                time.sleep(0.1)
             except KeyboardInterrupt:
                 self.stop()
 
