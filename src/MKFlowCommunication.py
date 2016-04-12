@@ -85,6 +85,7 @@ class MKFlowSequence():
         self.hasRequest = True
         self.hasAnswer = False
         self.RequestHasValue = False
+        self.timeRequest = Message.getSeconds()
 
     def setWriteRequest(self, Message):
         self.setReadRequest(Message)
@@ -100,14 +101,17 @@ class MKFlowSequence():
 
     def setAnswer(self, Message):
         self.Answer = Message.getSubType()
-        self.time = Message.getSeconds()
+        self.timeAnswer = Message.getSeconds()
         self.hasAnswer = True
         self.isStatus = False
         self.isError = False
 
     def check(self):
         if self.hasAnswer and self.hasRequest:
-            return True
+            if abs(self.timeAnswer - self.timeRequest) > 10:
+                return False
+            else:
+                return True
         else:
             return False
 
@@ -199,7 +203,7 @@ class MKFlowSequence():
                     Parameter.stdout()
                 except:
                     self.stdout()
-                    raise ValueError("error in MKFlowModbusClass output")
+                    raise ValueError("error in MKFlowCommunication ModbusClass stdout")
 
     def save(self, Database, instrument = 0):
         if self.check():
@@ -215,7 +219,7 @@ class MKFlowSequence():
                         name = Parameter.getName()
                         value = Parameter.getValue()
                         dataType = Parameter.getDataType()
-                        time = self.time
+                        time = self.timeAnswer
                         parameter = Parameter.getName()
                         Database.setFlowbus(instrument, proc, fbnr, dataType, value, time, parameter)
                 except:
