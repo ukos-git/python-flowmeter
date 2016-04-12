@@ -5,7 +5,8 @@ from MKDatabase import MKDatabase
 
 def main():
     Input = MKFlowInput()
-    Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
+    #Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
+    Input.setBridge('/dev/ttyUSB2', '/dev/ttyUSB3')
     Storage = MKFlowCommunication()
     Database = MKDatabase()
     while Input.isAlive():
@@ -23,19 +24,24 @@ def main():
                 try:
                     if Message.isError:
                         Entity.setError(Message)
-                    if Message.isStatus:
+                    elif Message.isStatus:
                         Entity.setStatus(Message)
-                    if Message.isSent:
+                    elif Message.isSent:
                         Entity.setAnswer(Message)
-                    if Message.isSentStatus:
+                    elif Message.isSentStatus:
                         Entity.setWriteRequest(Message)
-                    if Message.isRequest:
+                    elif Message.isRequest:
                         Entity.setReadRequest(Message)
+                    else:
+                        raise
                 except:
                     print "--- something happened ---"
-                    Message.stdout()
-                    Submessage.stdout()
-                    Entity.reset()
+                    try:
+                        Message.stdout()
+                        Submessage.stdout()
+                        Entity.reset()
+                    except:
+                        raise
                 else:
                     # store if two messages are present in current Entity
                     # reset Entity afterwards.
