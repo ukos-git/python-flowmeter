@@ -9,10 +9,8 @@ class MKFlowMessage():
 
     # input binary message and socat headline
     def process(self, message, socat = ''):
-        self.message1 = message
-        self.message2 = socat
-        if (len(socat) == 0):
-            self.setLength(len(message))
+        self.message1 = socat
+        self.message2 = message
         self.resetSubType()
         self.analyse()
 
@@ -50,7 +48,6 @@ class MKFlowMessage():
         self.node       = -1
         self.sequence   = -1
         self.length     = -1
-        self.manualLength = False
         self.dataLength = -1
         self.commandByte= -1
         self.commandByteHuman = ''
@@ -71,7 +68,6 @@ class MKFlowMessage():
 
     def setLength(self, length):
         self.length = length
-        self.manualLength = True
 
     def getDirection(self):
         return self.direction
@@ -93,9 +89,10 @@ class MKFlowMessage():
         self.message2 = self.message2.replace('\n','')
         while self.message2[0:1] == " ":
             self.message2 = self.message2[1:]
+            if len(self.message2) == 0:
+                break
 
     def split(self):
-        # split message
         self.message1 = self.message1.split(" ")
         self.message2 = self.message2.split(" ")
 
@@ -106,17 +103,14 @@ class MKFlowMessage():
             self.direction = 'left'
         else:
             self.direction = 'none'
-            self.Invalid.add('MKFlowMessage:analyseDirection socat error direction not recognized')
-            raise
 
     def analyseTime(self):
-        self.time = datetime.strptime(self.message1[1] + ';' + self.message1[2], "%Y/%m/%d;%H:%M:%S.%f")
+        if len(self.message1) > 1:
+            self.time = datetime.strptime(self.message1[1] + ';' + self.message1[2], "%Y/%m/%d;%H:%M:%S.%f")
+        else:
+            self.time = datetime.now()
         self.time_human = self.time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
         self.time_second = self.time.hour*60*60 + self.time.minute * 60 + self.time.second + self.time.microsecond/1e6
-
-    def analyseLength(self):
-        if not self.manualLength:
-            self.length = int(self.message1[4].split("=")[1])
 
     def parseMessage(self):
         try:
@@ -131,7 +125,7 @@ class MKFlowMessage():
         try:
             start = 0
             foundOne = False
-            while len(self.data) > start:
+            while len(self.data) -1 > start:
                 found = self.data[start:].index(16)
                 if self.data[(found+start+1)] == 16:
                     self.data.pop(found+start)
@@ -144,12 +138,10 @@ class MKFlowMessage():
             pass
         except:
             # other errors --> report
+            self.Invalid.add('parseData Error at found: %i start: %i len: %i' % (found, start, len(self.data)))
             raise
 
     def checkMessage2(self):
-        # all this has to be checked before the error is raised.
-        if not (len(self.message2)==self.length):
-            self.Invalid.add('MKFlowMessage:parseMessage2:\tError in socat output: length of message-data array does not macht socat length')
         # dataLength is length-Byte
         if not (self.dataLength==len(self.data)-3) and not (self.dataLength == 0):
             self.Invalid.add('MKFlowMessage:parseMessage2:\tError in socat output: length-Byte in message does not match socat length')
@@ -158,7 +150,7 @@ class MKFlowMessage():
             # DLE STX SEQUENCE NODE LEN DATA DLE ETX
         if not ((self.message2[0] == "10") and (self.message2[1] == "02")):
             self.Invalid.add('MKFlowMessage:parseMessage2:\tno valid message beginning:\tDLE (0x10) STX (0x02) missing')
-        if not ((self.message2[(self.length-2)] == "10") and (self.message2[(self.length-1)] == "03")):
+        if not ((self.message2[-2] == "10") and (self.message2[-1] == "03")):
             self.Invalid.add('MKFlowMessage:parseMessage2:\tno valid message ending:\tDLE (0x10) ETX (0x03) missing')
         if self.Invalid.isActive():
             raise ValueError('MKFlowMessage:parseMessage2:\tError while processing Message2')
@@ -193,7 +185,7 @@ class MKFlowMessage():
         try:
             self.analyseDirection()
             self.analyseTime()
-            self.analyseLength()
+            self.setLength(len(self.message2))
         except:
             self.Invalid.add('MKFlowMessage:analyseMessage1:\tError while processing message1')
             raise
