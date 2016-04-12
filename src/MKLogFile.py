@@ -42,7 +42,7 @@ class MKLogFileHandler:
 			self.timestamp_short = True
 		elif log_type ==  'error':
 			self.logfile    = self.path_general + self.path_run + self.path + self.file_error
-			self.openmode	= 'w' #open todays log file to add content
+			self.openmode	= 'w' #make new log file
 			self.separator	= ':\t'
 			self.newline	= '\n'
 
