@@ -431,16 +431,16 @@ class MKDatabase(object):
         parameterName = parameterName.encode("hex")
         if (dataTypeString == "character"):
             dataType = 0
-            data = hex(int(dataInput))
+            data = format(int(dataInput), 'x')
         elif(dataTypeString == "integer"):
             dataType = 1
-            data = hex(int(dataInput))
+            data = format(int(dataInput), 'x')
         elif(dataTypeString == "long"): # also handles float
             dataType = 2
-            data = hex(struct.unpack('<I', struct.pack('<f', float(dataInput)))[0])
+            data = format(struct.unpack('<I', struct.pack('<f', float(dataInput)))[0], 'x')
         elif(dataTypeString == "string"):
             dataType = 3
-            data = '0x' + dataInput.encode("hex")
+            data = dataInput.encode("hex")
         else:
             raise ValueError("can not identify dataType at setFlowBus")
 
@@ -448,11 +448,11 @@ class MKDatabase(object):
         INSERT INTO `cvd`.`runtime_flowbus`
         (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`, `parameter`)
         VALUES
-        (%i, %i, %i, %i, UNHEX(LPAD('%s',%i,'0')), %.2f, UNHEX(LPAD('%s',%i,'0')))""" % (instrument, process, flowBus, dataType, data[2:], self.storage_values * 2, time, parameterName, self.storage_description * 2)
+        (%i, %i, %i, %i, UNHEX(LPAD('%s',%i,'0')), %.2f, UNHEX(LPAD('%s',%i,'0')))""" % (instrument, process, flowBus, dataType, data, self.storage_values * 2, time, parameterName, self.storage_description * 2)
         self.sql += """
         ON DUPLICATE KEY UPDATE
         `data` = UNHEX(LPAD('%s',%i,'0')),
-        `time` = %.2f;""" % (data[2:], self.storage_values * 2, time)
+        `time` = %.2f;""" % (data, self.storage_values * 2, time)
         self.writeFlowbus()
 
     def getFlowbus(self, instrument, process, flowBus):
