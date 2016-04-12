@@ -2,127 +2,61 @@
 #import struct                  # imports struct API ???
 import os                       # imports file system functions like open()
 import time                     # sleep
+import subprocess               # socat
 import MKFlowMessage            # Message analyis class
+from MKFlowSocat import MKFlowSocat
+from MKFlowLogFile import MKFlowLogFile
 # Main Class
 class MKFlowInput():
     def __init__(self):
-        self.logfile = '/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log2.log'
-        self.openmode='r'
+        self.reset()
+
+    def reset(self):
         self.message1 = ''
         self.message2 = ''
-        self.fsoOpen    = False
-        self.ready = False
-        self.selfTest()
+        self.socat = False
+        self.log = False
+        self.port1 = ''
+        self.port2 = ''
 
-    def open(self):
-        if (not self.fsoOpen):
-            try:
-                self.fso = open(self.logfile, self.openmode)
-            except:
-                self.close()
-                raise ValueError('cannot open log file at ' + self.logfile)
-            else:
-                self.fsoOpen = True
+    def setLogFile(self,filename):
+        self.input = MKFlowLogFile(filename)
+        self.start()
 
-    def close(self):
-        if self.fsoOpen:
-            try:
-                self.fso.close()
-            except:
-                raise ValueError('cannot close log file at ' + self.logfile)
-            else:
-                self.fsoOpen = False
+    def setBridge(self, port1, port2):
+        self.input = MKFlowSocat(port1, port2)
+        self.start()
 
-    def write(self, strWrite):
-        self.open()
-        self.fso.write(strWrite)
-        self.fso.write('\n')
-        self.close()
+    def start(self):
+        self.input.open()
+        self.input.start()
+
+    def readOut(self):
+        while not self.input.isReady():
+            time.sleep(0.1)
+        self.message1, self.message2 = self.input.read()
 
     def getMessage(self):
         try:
-            message2 = ''
-            counter = 0
-            while self.readOut() and counter < 100:
-                Message = self.Message()
-                Message.process(self.message1, self.message2)
+            Message = self.Message()
+            self.readOut()
+            Message.process(self.message2, self.message1)
+            if Message.isInvalid:
+                # try next message. maybe they belong together
+                message_buffer = self.message2
+                self.readOut()
+                Message.process(self.message2, self.message1)
                 if Message.isInvalid:
-                    counter += Message.getLength()
-                    Message.setLength(counter)
-                    message2 += self.message2
-                    Message.process(self.message1, message2)
-                if not Message.isInvalid:
-                    return Message
-            if counter == 99:
-                raise ValueError('Too many invalid Bytes')
+                    message_buffer += self.message2
+                    Message.process(message_buffer, self.message1)
         except:
+            self.input.stop()
             raise
-            raise ValueError('Message Invalid or EOF reached')
-            return None
-
-    def isValid(self):
-        try:
-            if not self.message1:
-                raise ValueError('message1 invalid')
-            if not self.message2:
-                raise ValueError('message2 invalid')
-        except:
-            # no raise here. message is invalid.
-            return False
         else:
-            return True
-
-    def setLogFile(self,filename):
-        self.logfile = filename
-
-    def readOut(self):
-        self.read()
-        while not self.isReady():
-            print "read failed. sleeping ..."
-            time.sleep(0.1)
-            self.read()
-        # reset "ready-flag" at message readout
-        self.ready = False
-        if self.isValid():
-            return True
-        else:
-            return False
-
-
-    def read(self):
-        try:
-            if not self.ready:
-                self.open()
-                self.message1 = self.fso.readline()
-                self.message2 = self.fso.readline()
-        except:
-            # no raise here. we are not ready.
-            self.ready = False
-            self.close()
-        else:
-            self.ready = True
-
-
-    def isReady(self):
-        if self.ready:
-            return True
-        else:
-            return False
+            return Message
 
     def isAlive(self):
-        return self.alive
-
-    def kill(self):
-        self.alive = False
-
-    def selfTest(self):
-        try:
-            self.open()
-            self.close()
-        except:
-            self.alive = False
-        else:
-            self.alive = True
+        return self.input.isAlive()
 
     # shortcut
     class Message(MKFlowMessage.MKFlowMessage):
@@ -136,6 +70,4 @@ class MKFlowInput():
             pass
         class Sent(MKFlowMessage.MKFlowSent):
             pass
-        #class SetRequest(MKFlowMessage.MKFlowSetRequest):
-        #    pass
-# end MKFlow
+
