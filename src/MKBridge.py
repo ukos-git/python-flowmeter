@@ -14,7 +14,7 @@ def main():
             Message = Input.getMessage()
             SubMessage = Message.getSubType()
         except:
-            Input.kill()
+            raise # reraise for debug reasons
             break
         else:
             if not Message.isInvalid:
@@ -46,9 +46,10 @@ def main():
                     # store if two messages are present in current Entity
                     # reset Entity afterwards.
                     try:
-                        #Entity.output()
+                        Entity.output()
                         Entity.save(Database)
                     except ValueError:
+                        raise
                         pass
                     except:
                         raise
