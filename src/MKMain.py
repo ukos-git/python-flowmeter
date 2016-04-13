@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import MKTerminal,MKSerial,MKParser,MKDatabase
+import MKTerminal,MKSerial,MKParser,MKDatabase,MKFlowMain
 from MKLogFile import MKLogFileHandler
 import threading	# multithreading
 import time			# sleep
@@ -42,6 +42,8 @@ def main():
     # Create new threads
     arduino = MKSerial.MKSerial('arduino','/dev/ttyACM0',9600)
     terminal = MKTerminal.MKTerminal()
+    ethanol = MKFlowMain.MKFlow('/dev/ttyUSB2', '/dev/ttyUSB3', 0)
+    argon = MKFlowMain.MKFlow('/dev/ttyUSB0', '/dev/ttyUSB1', 1)
     transmitter = threading.Thread(target=myTransmitter, args=(arduino,terminal))
     transmitter.setDaemon(True) # never care about it anymore
 
@@ -49,6 +51,8 @@ def main():
     threads.append(arduino)
     threads.append(terminal)
     threads.append(transmitter)#append after arduino and terminal!
+    threads.append(ethanol)
+    threads.append(argon)
 
     # Start new Threads
     for t in threads:
