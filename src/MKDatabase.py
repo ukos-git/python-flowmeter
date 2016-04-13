@@ -41,6 +41,7 @@ class MKDatabase(object):
             user = dbUser,
             passwd = dbPass,
             db = dbName,
+            client_flag = CLIENT.FOUND_ROWS
             )
     def close(self):
         self.db.close()
@@ -99,7 +100,7 @@ class MKDatabase(object):
                     self.ip = "132.187.77.181"
                 else:
                     self.ip = "132.187.77.177"
-            return self.ip
+        return self.ip
 
     def checkIP(self):
         if os.system("ping -c 1 -W 1 " + self.ip + " > /dev/null") == 0:
