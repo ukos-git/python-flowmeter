@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import MySQLdb
+from MySQLdb.constants import CLIENT
 import os
 import socket
 import decimal
@@ -131,6 +132,8 @@ class MKDatabase(object):
     def writeArduino(self):
         try:
             self.write()
+            if self.cursor.rowcount == 0:
+                raise
         except:
             try:
                 temp = self.sql
@@ -205,6 +208,8 @@ class MKDatabase(object):
     def writeRecording(self):
         try:
             self.write()
+            if self.cursor.rowcount == 0:
+                raise
         except:
             try:
                 temp = self.sql
