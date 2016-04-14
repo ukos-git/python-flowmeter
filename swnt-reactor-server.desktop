@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=CVDapp
+Comment=A GUI for the CVD
+Exec=/home/pi/programs/swnt-reactor/swnt-reactor-server.sh
+Icon=/home/pi/programs/swnt-reactor/swnt-reactor-icon.png
+Categories=Programming
+Terminal=true
+X-KeepTerminal=true
+Name[POSIX]=CVDserver
+Comment[POSIX]=A server for the CVDapp
