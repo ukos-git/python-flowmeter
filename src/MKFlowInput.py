@@ -31,6 +31,9 @@ class MKFlowInput():
         self.input.open()
         self.input.start()
 
+    def stop(self):
+        self.input.stop()
+
     def readOut(self):
         while not self.input.isReady():
             time.sleep(0.1)
