@@ -254,6 +254,8 @@ class MKDatabase(object):
     def writeMessage(self):
         try:
             self.write()
+            if self.cursor.rowcount == 0:
+                raise
         except:
             try:
                 temp = self.sql
