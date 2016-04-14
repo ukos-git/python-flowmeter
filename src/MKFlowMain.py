@@ -20,7 +20,7 @@ class MKFlow():
             self.thread.daemon = True
             self.thread.start()
         except:
-            self.Input.stop()
+            self.stop()
             raise
 
     def stop(self):
