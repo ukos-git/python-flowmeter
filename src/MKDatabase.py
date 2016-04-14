@@ -10,7 +10,7 @@ import struct
 #cvd-client->rbBmSDP7fSKp87b5
 
 class MKDatabase(object):
-    ip = "132.187.77.177"
+    ip = "132.187.77.71"
     sql = ""
     data = ""
     ready = False
@@ -91,16 +91,19 @@ class MKDatabase(object):
             return False
 
     def getIP(self):
-        if (self.hostname == "raspberrypi"):
+        if (self.hostname == "cvd"):
             self.ip = 'localhost'
         else:
             while self.checkIP() == False:
-                if self.ip == "132.187.77.177":
-                    self.ip = "132.187.77.184"
-                elif self.ip == "132.187.77.184":
-                    self.ip = "132.187.77.181"
-                else:
+                print "ip not found. switching ..."
+                if self.ip == "132.187.77.71":
                     self.ip = "132.187.77.177"
+                elif self.ip == "132.187.77.177":
+                    self.ip = "132.187.77.181"
+                elif self.ip == "132.187.77.181":
+                    self.ip = "132.187.77.184"
+                else: # self.ip == "132.187.77.184"
+                    self.ip = "132.187.77.71"
         return self.ip
 
     def checkIP(self):
