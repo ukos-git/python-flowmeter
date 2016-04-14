@@ -13,6 +13,10 @@ class MKFlow():
         self.Input.setBridge(port1, port2)
         #self.Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
         self.instrument = instrument
+        self.debug = False
+
+    def startDebug(self):
+        self.debug = False
 
     def start(self):
         try:
@@ -66,8 +70,11 @@ class MKFlow():
                         # store if two messages are present in current Entity
                         # reset Entity afterwards.
                         try:
-                            #Entity.output()
-                            Entity.save(self.Database, self.instrument)
+                            if self.debug:
+                                print "Buffer: %i" % self.Input.input.buffersize()
+                                Entity.output()
+                            #Entity.save(self.Database, self.instrument)
+                            pass
                         except ValueError:
                             raise
                             pass
