@@ -50,7 +50,12 @@ class MKFlowSocat:
         return '', self.buffer.pop(0)
 
     def isReady(self):
-        return self.bufferSize() > 0
+        size = self.bufferSize()
+        if size > 30:
+            self.buffer = [self.buffer[-1]]
+            print "buffer overflow"
+            return True
+        return size > 0
 
     def bufferSize(self):
         return len(self.buffer)
