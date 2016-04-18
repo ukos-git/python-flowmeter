@@ -499,11 +499,21 @@ class MKDatabase(object):
 
     def getAll(self):
         self.open()
-        self.sql = """SELECT temperature, pressure, ethanol, argon,
+        sql = """SELECT temperature, pressure, ethanol, argon,
                              spTemperature, spPressure, spEthanol, spArgon
                       FROM `cvd`.`runtime_arduino`
                       LIMIT 1"""
-        self.read()
+        try:
+            self.sql = sql
+            self.read()
+        except:
+            try:
+                self.createArduino()
+                self.resetArduino()
+                self.sql = sql
+                self.read()
+            except:
+                raise
         (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
         self.close()
 
