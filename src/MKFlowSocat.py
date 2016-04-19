@@ -48,6 +48,9 @@ class MKFlowSocat:
     def read(self):
         if self.buffer[0][0] == "<" or self.buffer[0][0] == ">":
             return self.buffer.pop(0), self.buffer.pop(0)
+        elif len(self.buffer[0]) == 0:
+            # message 1 is empty. pop two messages
+            return self.buffer.pop(0), self.buffer.pop(0)
         else:
             # message 1 is missing in rpi's socat
             return '', self.buffer.pop(0)
