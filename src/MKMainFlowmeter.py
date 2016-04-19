@@ -14,7 +14,6 @@ for t in threads:
     print "starting ..."
     t.start()
     t.debug()
-    print "started."
 
 try:
     while True:
@@ -23,5 +22,3 @@ except KeyboardInterrupt:
     for t in threads:
         print "stoping ..."
         t.stop()
-        print "stoped."
-    raise
