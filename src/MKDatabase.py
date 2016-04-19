@@ -134,8 +134,11 @@ class MKDatabase(object):
         except:
             try:
                 temp = self.sql
-                self.createArduino()
-                self.resetArduino()
+                try:
+                    self.createArduino()
+                    self.resetArduino()
+                except:
+                    pass
                 self.sql = temp
                 self.write()
             except:

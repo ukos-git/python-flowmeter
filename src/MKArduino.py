@@ -63,3 +63,4 @@ class MKArduino():
                     self.Logfile.write(oneline)
                 else:
                     self.newFile = True
+
