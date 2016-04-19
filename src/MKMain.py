@@ -22,7 +22,7 @@ for t in threads:
     print "started."
 
 try:
-    #threads[0].startDebug()
+    #threads[0].debug()
     while True:
         time.sleep(10)
 except KeyboardInterrupt:
