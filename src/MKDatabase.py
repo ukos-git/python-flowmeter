@@ -91,7 +91,7 @@ class MKDatabase(object):
             return False
 
     def getIP(self):
-        if (self.hostname == "cvd"):
+        if (self.hostname == "lab117"):
             self.ip = 'localhost'
         else:
             self.ip == "132.187.77.71"
