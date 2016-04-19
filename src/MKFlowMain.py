@@ -73,7 +73,7 @@ class MKFlow():
                             if self.debug:
                                 print "Buffer: %i" % self.Input.input.bufferSize()
                                 Entity.output()
-                            #Entity.save(self.Database, self.instrument)
+                            Entity.save(self.Database, self.instrument)
                             pass
                         except ValueError:
                             raise
