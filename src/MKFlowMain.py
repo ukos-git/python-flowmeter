@@ -15,8 +15,8 @@ class MKFlow():
         self.instrument = instrument
         self.debug = False
 
-    def startDebug(self):
-        self.debug = False
+    def debug(self):
+        self.debug = True
 
     def start(self):
         try:
@@ -71,7 +71,7 @@ class MKFlow():
                         # reset Entity afterwards.
                         try:
                             if self.debug:
-                                print "Buffer: %i" % self.Input.input.buffersize()
+                                print "Buffer: %i" % self.Input.input.bufferSize()
                                 Entity.output()
                             #Entity.save(self.Database, self.instrument)
                             pass
