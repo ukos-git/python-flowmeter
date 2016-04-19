@@ -71,7 +71,9 @@ class MKFlow():
                         # reset Entity afterwards.
                         try:
                             if self.debugging:
-                                print "Buffer: %i" % self.Input.input.bufferSize()
+                                bufferSize = self.Input.input.bufferSize()
+                                if bufferSize > 0:
+                                    print "Buffer: %i" % bufferSize
                                 Entity.output()
                             Entity.save(self.Database, self.instrument)
                             pass
