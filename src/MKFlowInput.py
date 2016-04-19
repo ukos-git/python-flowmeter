@@ -52,11 +52,6 @@ class MKFlowInput():
                 if Message.isInvalid:
                     message_buffer += self.message2
                     Message.process(message_buffer, self.message1)
-                    if Message.isInvalid:
-                        print "--- buffer ---"
-                        print message_buffer
-                        print "---        ---"
-                        raise
         except:
             self.input.stop()
             raise
