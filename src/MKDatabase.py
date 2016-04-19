@@ -94,16 +94,10 @@ class MKDatabase(object):
         if (self.hostname == "cvd"):
             self.ip = 'localhost'
         else:
-            while self.checkIP() == False:
-                print "ip not found. switching ..."
-                if self.ip == "132.187.77.71":
-                    self.ip = "132.187.77.177"
-                elif self.ip == "132.187.77.177":
-                    self.ip = "132.187.77.181"
-                elif self.ip == "132.187.77.181":
-                    self.ip = "132.187.77.184"
-                else: # self.ip == "132.187.77.184"
-                    self.ip = "132.187.77.71"
+            self.ip == "132.187.77.71"
+        if not self.checkIP():
+            print "ip not found"
+            raise
         return self.ip
 
     def checkIP(self):
