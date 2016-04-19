@@ -14,10 +14,10 @@ class MKArduino():
         self.Database = MKDatabase()
         self.newFile = True
         self.alive = False
-        self.debug = False
+        self.debugging = False
 
-    def startDebug(self):
-        self.debug = True
+    def debug(self):
+        self.debugging = True
 
     def start(self):
         try:
@@ -49,7 +49,7 @@ class MKArduino():
             if self.Serial.isReady():
                 self.Parser.input(self.Serial.getMessage())
                 oneline = self.Parser.oneline()
-                if self.debug:
+                if self.debugging:
                     print oneline
                 if not self.Parser.isHeadline() and self.Parser.getStatus():
                     self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
