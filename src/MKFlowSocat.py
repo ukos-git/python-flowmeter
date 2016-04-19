@@ -46,8 +46,11 @@ class MKFlowSocat:
             self.buffer.append(line)
 
     def read(self):
-        # message 1 is missing in rpi's socat
-        return '', self.buffer.pop(0)
+        if self.buffer[0][0] == "<" or self.buffer[0][0] == ">":
+            return self.buffer.pop(0), self.buffer.pop(0)
+        else:
+            # message 1 is missing in rpi's socat
+            return '', self.buffer.pop(0)
 
     def isReady(self):
         size = self.bufferSize()
