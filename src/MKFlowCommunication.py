@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import MKDatabase
+from MKFlowMessage import FBconvertLong
 # Main Class
 class MKFlowCommunication():
     def __init__(self):
@@ -298,9 +299,9 @@ class MKFlowModbus():
             return False
 
     def stdout(self):
-        returnarray = [self.invalid, self.process, self.number, self.human]
+        returnarray = [self.isInvalid(), self.getProcess(), self.getNumber(), self.getName()]
         if not self.invalid:
-            returnarray += [self.value]
+            returnarray += [FBconvertLong(self.getProcess(), self.getNumber(), self.getValue())]
         else:
             returnarray += [self.error]
         print '\t'.join(str(i) for i in returnarray)

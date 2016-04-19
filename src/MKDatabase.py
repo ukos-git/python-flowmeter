@@ -6,7 +6,7 @@ import os
 import socket
 import decimal
 import struct
-
+from MKFlowMessage import FBconvertLong # converter for long numbers to float and percent
 #cvd-client->rbBmSDP7fSKp87b5
 
 class MKDatabase(object):
@@ -440,9 +440,9 @@ class MKDatabase(object):
         elif(dataTypeString == "integer"):
             dataType = 1
             data = format(int(dataInput), 'x')
-        elif(dataTypeString == "long"): # also handles float
+        elif(dataTypeString == "long"):
             dataType = 2
-            data = format(struct.unpack('<I', struct.pack('<f', float(dataInput)))[0], 'x')
+            data = format(int(dataInput), 'x')
         elif(dataTypeString == "string"):
             dataType = 3
             data = dataInput.encode("hex")
@@ -481,8 +481,8 @@ class MKDatabase(object):
             data = int(dataOut, 16)
         elif(dataType == 1):
             data = int(dataOut, 16)
-        elif(dataType == 2): # only handles float
-            data = struct.unpack(">f", struct.pack(">I",int(dataOut,16)))[0]
+        elif(dataType == 2):
+            data = FBconvertLong(process, flowBus, int(dataOut,16))
         elif(dataType == 3):
             data = dataOut.decode("hex")
         else:
