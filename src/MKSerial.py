@@ -60,6 +60,10 @@ class MKSerial:
         except self.serial.SerialException, e:
             self.error.write('Could not open serial port')
             sys.exit(1)
+        while not self.serial.isOpen():
+            self.error.write('opening port ...')
+            time.sleep(0.1)
+        self.error.write('port open.')
 
     def start(self):
         self.error.write('starting thread')
@@ -75,22 +79,26 @@ class MKSerial:
         self.thread.join()
 
     def stop(self):
-        self.error.write('stopping thread')
+        self.error.write('stopping thread ...')
         try:
             self.alive = False
             #self.join()
         except:
             self.error.write('error stopping thread')
+        else:
+            self.error.write('thread stopped.')
         self.close()
 
     def close(self):
-        self.error.write('closing serial connection')
+        self.error.write('closing serial connection ...')
         try:
             self.serial.setDTR(False)
             self.serial.setRTS(False)
             self.serial.close()
         except:
             self.error.write('error closing serial connection')
+        else:
+            self.error.write('serial connection closed.')
 
     def send(self,message):
         self.sendBuffer+=message
@@ -122,6 +130,7 @@ class MKSerial:
                 self.error.write('Exception in infinite Loop')
                 self.stop()
             time.sleep(0.1)
+        self.error.write('stoped infinite loop.')
 
     def isAlive(self):
         return self.alive
