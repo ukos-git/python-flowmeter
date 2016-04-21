@@ -95,9 +95,9 @@ class MKDatabase(object):
             self.ip = 'localhost'
         else:
             self.ip == "132.187.77.71"
-        if not self.checkIP():
+        while not self.checkIP():
             print "ip not found"
-            raise
+            time.sleep(0.1)
         return self.ip
 
     def checkIP(self):
