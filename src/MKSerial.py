@@ -13,7 +13,7 @@ CRLF = serial.to_bytes([13, 10])
 
 class MKSerial:
     sendBuffer = ''
-    receiveBuffer=''
+    receiveBuffer = []
     alive=False
 
     serialName='unnamed'
@@ -103,7 +103,7 @@ class MKSerial:
         self.sendBuffer+=message
 
     def receive(self, message):
-        self.receiveBuffer += message
+        self.receiveBuffer.append(message)
 
     def read(self):
         val = self.serial.readline();   #read line by line data from the serial file
@@ -143,7 +143,6 @@ class MKSerial:
             return True
 
     def getMessage(self):
-        text = self.receiveBuffer
-        self.receiveBuffer=''
+        text = self.receiveBuffer.pop(0)
         return text
 
