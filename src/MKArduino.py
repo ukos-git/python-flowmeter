@@ -53,13 +53,18 @@ class MKArduino():
                     print "database ready ..."
                 self.Serial.send(self.Database.getMessage())
             if self.Serial.isReady():
-                self.Parser.input(self.Serial.getMessage())
+                message = self.Serial.getMessage()
+                self.Parser.input(message)
                 oneline = self.Parser.oneline()
                 if self.debugging:
                     print oneline
                 if not self.Parser.isHeadline() and self.Parser.getStatus():
-                    self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
-                    self.Database.setSetpoint(self.Parser.get(3), self.Parser.get(6), self.Parser.get(9), self.Parser.get(12))
+                    try:
+                        self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
+                        self.Database.setSetpoint(self.Parser.get(3), self.Parser.get(6), self.Parser.get(9), self.Parser.get(12))
+                    except:
+                        # database write failed. add message to buffer
+                        self.Serial.receive(message)
                 if self.Database.isRecording():
                     if self.newFile:
                         self.Logfile = MKLogFileHandler('mkmain','log',True)

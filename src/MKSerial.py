@@ -103,10 +103,13 @@ class MKSerial:
     def send(self,message):
         self.sendBuffer+=message
 
+    def receive(self, message):
+        self.receiveBuffer += message
+        self.ready = True
+
     def read(self):
         val = self.serial.readline();   #read line by line data from the serial file
-        self.receiveBuffer += val       #clear from time to time!
-        self.ready=True
+        self.receive(val)              #clear from time to time!
         self.run.write(val)
 
     def write(self):
