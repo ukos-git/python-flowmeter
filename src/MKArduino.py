@@ -42,9 +42,15 @@ class MKArduino():
         return self.alive
 
     def loop(self):
+        if self.debugging:
+            print "entering loop ..."
         while self.isAlive():
+            if self.debugging:
+                print "sleeping ..."
             time.sleep(0.1)
             if self.Database.isReady():
+                if self.debugging:
+                    print "database ready ..."
                 self.Serial.send(self.Database.getMessage())
             if self.Serial.isReady():
                 self.Parser.input(self.Serial.getMessage())
