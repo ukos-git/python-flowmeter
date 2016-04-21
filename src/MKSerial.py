@@ -15,7 +15,6 @@ class MKSerial:
     sendBuffer = ''
     receiveBuffer=''
     alive=False
-    ready=False
 
     serialName='unnamed'
     serialPort=''
@@ -105,7 +104,6 @@ class MKSerial:
 
     def receive(self, message):
         self.receiveBuffer += message
-        self.ready = True
 
     def read(self):
         val = self.serial.readline();   #read line by line data from the serial file
@@ -139,11 +137,13 @@ class MKSerial:
         return self.alive
 
     def isReady(self):
-        return self.ready
+        if len(self.receiveBuffer) == 0:
+            return False
+        else:
+            return True
 
     def getMessage(self):
         text = self.receiveBuffer
         self.receiveBuffer=''
-        self.ready=False
         return text
 

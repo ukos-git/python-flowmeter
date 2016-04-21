@@ -45,9 +45,10 @@ class MKArduino():
         if self.debugging:
             print "entering loop ..."
         while self.isAlive():
-            if self.debugging:
-                print "sleeping ..."
-            time.sleep(0.1)
+            if not self.Serial.isReady() and not self.Database.isReady():
+                if self.debugging:
+                    print "sleeping ..."
+                time.sleep(0.1)
             if self.Database.isReady():
                 if self.debugging:
                     print "database ready ..."
