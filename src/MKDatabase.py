@@ -278,10 +278,16 @@ class MKDatabase(object):
         self.writeArduino()
 
     def setData(self, temperature, pressure, argon, ethanol):
-        self.temperature = decimal.Decimal(temperature)
-        self.pressure = decimal.Decimal(pressure)
-        self.argon = decimal.Decimal(argon)
-        self.ethanol = decimal.Decimal(ethanol)
+        try:
+            self.temperature = decimal.Decimal(temperature)
+            self.pressure = decimal.Decimal(pressure)
+            self.argon = decimal.Decimal(argon)
+            self.ethanol = decimal.Decimal(ethanol)
+        except:
+            self.temperature = 0.00
+            self.pressure = 0.00
+            self.argon = 0.00
+            self.ethanol = 0.00
         self.sql = """UPDATE `cvd`.`runtime_arduino`
                 SET	`temperature`	= %s,
                         `pressure`	= %s,
