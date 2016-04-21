@@ -10,8 +10,8 @@ threads.append(arduino)
 
 for t in threads:
     print "starting ..."
-    t.start()
     t.debug()
+    t.start()
 
 try:
     while True:
