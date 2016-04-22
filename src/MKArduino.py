@@ -68,11 +68,13 @@ class MKArduino():
                         self.Serial.receive(message)
                 if self.Database.isRecording():
                     if self.newFile:
+                        print "starting new LogFile"
                         self.Logfile = MKLogFileHandler('mkmain','log',True)
                         self.Logfile.open()
                         self.newFile = False
                         self.setFile = True
                     if self.setFile:
+                        print "set FileName in Database"
                         if self.Database.setLogFile(self.Logfile.getLogFile()):
                             self.setFile = False
                     self.Logfile.write(oneline)
