@@ -51,8 +51,8 @@ class swntReactorGUI(object):
         self.bufferDisplay.set(self.Buffer)
 
     def BufferSend(self):
-        self.db.setMessage(self.Buffer)
-        self.BufferClear()
+        if self.db.setMessage(self.Buffer):
+            self.BufferClear()
 
     def BufferClear(self):
         self.Buffer = ''
@@ -149,10 +149,11 @@ class swntReactorGUI(object):
 
     def buttonRecord(self, event=None):
         if self.db.isRecording():
-            self.db.stopRecording()
+            success = self.db.stopRecording()
         else:
-            self.db.startRecording()
-        self.timer = 0
+            success = self.db.startRecording()
+        if success:
+            self.timer = 0
 
     def geometryToggle(self,event=None):
         # event will be filled with Tkinter.Event when Key is Pressed. 
