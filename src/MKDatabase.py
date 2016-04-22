@@ -317,12 +317,22 @@ class MKDatabase(object):
         return self.writeArduino(sql)
 
     def setLogFile(self, fileName):
+        id = self.getRecordingID()
+        if id < 0:
+            return False
         sql = """UPDATE `cvd`.`recording`
-                    SET	`filename` = '%s'
-                    WHERE `recording` = 1
-                    LIMIT 1;""" % (fileName)
-        self.write(sql)
-        self.fileName = fileName
+                    SET	`filename`  = '%s',
+                        `recording` = 1
+                    WHERE `id` = %i
+                    LIMIT 1;""" % (fileName, id)
+        try:
+            self.write(sql)
+        except:
+            return False
+        if self.getLogFile() == fileName:
+            return True
+        else:
+            return False
 
     def isRecording(self):
         sql = """SELECT `recording`
