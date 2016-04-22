@@ -50,11 +50,14 @@ class MKDatabase(object):
             return True
     def close(self):
         try:
-            # only close if network available and db was opened before
-            if self.checkIP() and self.isOpen():
+            if self.isOpen():
                 self.db.close()
         except:
-            print "database close failed."
+            if self.checkIP():
+                print "database close failed."
+            else:
+                print "connection lost. Database could not be closed normal"
+                self.connected = False
         else:
             self.connected = False
 
@@ -112,15 +115,14 @@ class MKDatabase(object):
     def writeArduino(self, sql):
         try:
             self.write(sql, True)
-            self.close()
         except:
             try:
                 # create database and try again.
                 self.createArduino()
                 self.resetArduino()
                 self.write(sql)
-                self.close()
             except:
+                self.close()
                 return False
             else:
                 return True
@@ -130,14 +132,13 @@ class MKDatabase(object):
     def writeRecording(self, sql):
         try:
             self.write(sql, True)
-            self.close()
         except:
             try:
                 self.createRecording()
                 self.resetRecording()
                 self.write(sql)
-                self.close()
             except:
+                self.close()
                 return False
             else:
                 return True
@@ -147,13 +148,12 @@ class MKDatabase(object):
     def writeFlowbus(self, sql):
         try:
             self.write(sql)
-            self.close()
         except:
             try:
                 self.createFlowbus()
                 self.write(sql)
-                self.close()
             except:
+                self.close()
                 return False
             else:
                 return True
@@ -163,14 +163,13 @@ class MKDatabase(object):
     def writeMessage(self, sql):
         try:
             self.write(sql, True)
-            self.close()
         except:
             try:
                 self.createMessage()
                 self.resetMessage()
                 self.write(sql)
-                self.close()
             except:
+                self.close()
                 return False
             else:
                 return True
