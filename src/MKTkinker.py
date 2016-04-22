@@ -52,6 +52,7 @@ class swntReactorGUI(object):
 
     def BufferSend(self):
         if self.db.setMessage(self.Buffer):
+            self.LabelBufferDisplay.configure(fg='green')
             self.BufferClear()
 
     def BufferClear(self):
