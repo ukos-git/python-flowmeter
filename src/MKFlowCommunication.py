@@ -208,6 +208,7 @@ class MKFlowSequence():
 
     def save(self, Database, instrument = 0):
         if self.check():
+            reset = True
             if not self.isAnalysed:
                 self.analyse()
             for index in self.parameter_ids:
@@ -222,11 +223,15 @@ class MKFlowSequence():
                         dataType = Parameter.getDataType()
                         time = self.timeAnswer
                         parameter = Parameter.getName()
-                        Database.setFlowbus(instrument, proc, fbnr, dataType, value, time, parameter)
+                        reset = Database.setFlowbus(instrument, proc, fbnr, dataType, value, time, parameter)
                 except:
                     self.stdout()
-                    raise ValueError("error storing parameter")
-            self.reset()
+                    print "error storing parameter."
+                    reset = False
+            if reset:
+                self.reset()
+            else:
+                print "Sequence not cleared."
 
     def stdout(self):
         print "--- sequence: %i ---" % self.sequence
