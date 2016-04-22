@@ -517,7 +517,8 @@ class MKDatabase(object):
                 self.sql = sql
                 self.read()
             except:
-                raise
+                self.data = (-1,-1,-1,-1, -1,-1,-1,-1)
+                print "database readout failed for arduino!"
         (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
         self.close()
 
