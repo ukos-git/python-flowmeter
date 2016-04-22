@@ -63,11 +63,14 @@ class MKDatabase(object):
 
     def write(self, sql, update = False):
         # on update statements rise also if no lines were affected
+        affectedRows = 0
         if not self.open():
             raise
         try:
             cursor = self.db.cursor()
             cursor.execute(sql)
+            affectedRows = cursor.rowcount
+            cursor.close()
             self.db.commit()
         except:
             print "database write failed."
@@ -79,25 +82,29 @@ class MKDatabase(object):
                 print "database rollback failed."
             raise
         else:
-            if update and cursor.rowcount == 0:
+            if update and affectedRows == 0:
                 raise
-            return cursor.rowcount
+            return affectedRows
 
     def read(self, sql):
+        affectedRows = 0
         if not self.open():
             return []
         try:
             cursor = self.db.cursor()
             cursor.execute(sql)
+            data = cursor.fetchone()
+            affectedRows = cursor.rowcount
+            cursor.close()
+            self.close()
         except:
             print "database read failed."
             print sql
+            cursor.close()
             self.close()
             data = []
-        else:
-            data = cursor.fetchone()
 
-        if cursor.rowcount:
+        if affectedRows:
             return data
         else:
             return []
@@ -105,12 +112,14 @@ class MKDatabase(object):
     def writeArduino(self, sql):
         try:
             self.write(sql, True)
+            self.close()
         except:
             try:
                 # create database and try again.
                 self.createArduino()
                 self.resetArduino()
                 self.write(sql)
+                self.close()
             except:
                 return False
             else:
@@ -121,11 +130,13 @@ class MKDatabase(object):
     def writeRecording(self, sql):
         try:
             self.write(sql, True)
+            self.close()
         except:
             try:
                 self.createRecording()
                 self.resetRecording()
                 self.write(sql)
+                self.close()
             except:
                 return False
             else:
@@ -136,10 +147,12 @@ class MKDatabase(object):
     def writeFlowbus(self, sql):
         try:
             self.write(sql)
+            self.close()
         except:
             try:
                 self.createFlowbus()
                 self.write(sql)
+                self.close()
             except:
                 return False
             else:
@@ -150,11 +163,13 @@ class MKDatabase(object):
     def writeMessage(self, sql):
         try:
             self.write(sql, True)
+            self.close()
         except:
             try:
                 self.createMessage()
                 self.resetMessage()
                 self.write(sql)
+                self.close()
             except:
                 return False
             else:
@@ -325,9 +340,7 @@ class MKDatabase(object):
                         `recording` = 1
                     WHERE `id` = %i
                     LIMIT 1;""" % (fileName, id)
-        try:
-            self.write(sql)
-        except:
+        if not self.writeRecording(sql):
             return False
         if self.getLogFile() == fileName:
             return True
