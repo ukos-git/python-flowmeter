@@ -13,7 +13,7 @@ from MKFlowMessage import FBconvertLong # converter for long numbers to float an
 class MKDatabase(object):
     ip = "132.187.77.71"
     sql = ""
-    data = ""
+    connected = False
     ready = False
     messageID = -1
     hostname = ""
@@ -24,61 +24,148 @@ class MKDatabase(object):
     storage_values = 30
 
     def __init__(self):
-        self.hostname = self.getHostname()
-        self.ip = self.getIP()
         self.test()
         decimal.getcontext().prec = 2
 
     def open(self):
-        dbHost = self.getIP()
-        dbName = "cvd"
-        if self.isRaspberry():
-            dbUser = "cvd-server"
-            dbPass = "Rsna3UTbWWS4TDm3"
-        else:
+        if self.isOpen():
+            return True
+        try:
+            dbHost = self.getIP()
+            dbName = "cvd"
             dbUser = "cvd-client"
             dbPass = "rbBmSDP7fSKp87b5"
-        self.db = MySQLdb.connect(
-            host = dbHost,
-            user = dbUser,
-            passwd = dbPass,
-            db = dbName,
-            client_flag = CLIENT.FOUND_ROWS
-            )
+            self.db = MySQLdb.connect(
+                host = dbHost,
+                user = dbUser,
+                passwd = dbPass,
+                db = dbName,
+                client_flag = CLIENT.FOUND_ROWS
+                )
+        except:
+            print "database open failed."
+            return False
+        else:
+            self.connected = True
+            return True
     def close(self):
-        self.db.close()
-
-    def write(self):
-        self.open()
-        self.cursor = self.db.cursor()
         try:
-            self.cursor.execute(self.sql)
+            # only close if network available and db was opened before
+            if self.checkIP() and self.isOpen():
+                self.db.close()
+        except:
+            print "database close failed."
+        else:
+            self.connected = False
+
+    def isOpen(self):
+        return self.connected
+
+    def write(self, sql, update = False):
+        # on update statements rise also if no lines were affected
+        if not self.open():
+            raise
+        try:
+            cursor = self.db.cursor()
+            cursor.execute(sql)
             self.db.commit()
-            self.close()
         except:
-            self.db.rollback()
-            self.close()
+            print "database write failed."
+            print sql
+            try:
+                self.db.rollback()
+                self.close()
+            except:
+                print "database rollback failed."
             raise
+        else:
+            if update and cursor.rowcount == 0:
+                raise
+            return cursor.rowcount
 
-    def read(self):
+    def read(self, sql):
+        if not self.open():
+            return []
         try:
-            self.open()
-            self.cursor = self.db.cursor()
-            self.cursor.execute(self.sql)
-            if not self.cursor.rowcount:
-                self.data = ""
-            else:
-                self.data = self.cursor.fetchone()
-            self.close
+            cursor = self.db.cursor()
+            cursor.execute(sql)
+            if not cursor.rowcount:
+                raise
         except:
-            raise
+            print "database read failed."
+            self.close()
+            data = []
+        else:
+            data = cursor.fetchone()
+
+        return data
+
+    def writeArduino(self, sql):
+        try:
+            self.write(sql, True)
+        except:
+            try:
+                # create database and try again.
+                self.createArduino()
+                self.resetArduino()
+                self.write(sql)
+            except:
+                return False
+            else:
+                return True
+        else:
+            return True
+
+    def writeRecording(self, sql):
+        try:
+            self.write(sql, True)
+        except:
+            try:
+                self.createRecording()
+                self.resetRecording()
+                self.write(sql)
+            except:
+                return False
+            else:
+                return True
+        else:
+            return True
+
+    def writeFlowbus(self, sql):
+        try:
+            self.write(sql)
+        except:
+            try:
+                self.createFlowbus()
+                self.write(sql)
+            except:
+                return False
+            else:
+                return True
+        else:
+            return True
+
+    def writeMessage(self, sql):
+        try:
+            self.write(sql, True)
+        except:
+            try:
+                self.createMessage()
+                self.resetMessage()
+                self.write(sql)
+            except:
+                return False
+            else:
+                return True
+        else:
+            return True
 
     def test(self):
         self.open()
-        self.sql="SELECT VERSION()"
-        self.read()
+        sql="SELECT VERSION()"
+        data = self.read(sql)
         self.close()
-        print "MySQL version : %s " % self.data
+        print "MySQL version : %s " % data
 
     def getHostname(self):
         return socket.gethostname()
@@ -108,7 +195,7 @@ class MKDatabase(object):
             return False
 
     def createArduino(self):
-        self.sql = """CREATE TABLE IF NOT EXISTS `runtime_arduino` (
+        sql = """CREATE TABLE IF NOT EXISTS `runtime_arduino` (
                 `temperature` decimal(6,2) NOT NULL DEFAULT '0',
                 `pressure` decimal(6,2) NOT NULL DEFAULT '0',
                 `argon` decimal(6,2) NOT NULL DEFAULT '0',
@@ -118,38 +205,17 @@ class MKDatabase(object):
                 `spEthanol` int(11) NOT NULL DEFAULT '0',
                 `spArgon` int(11) NOT NULL DEFAULT '0'
                 ) ENGINE=MEMORY DEFAULT Charset=utf8;"""
-        self.write()
+        self.write(sql)
 
     def resetArduino(self):
-        self.sql = """INSERT INTO `runtime_arduino`
+        sql = """INSERT INTO `runtime_arduino`
                         (`temperature`, `pressure`, `argon`, `ethanol`, `spTemperature`, `spPressure`, `spEthanol`, `spArgon`)
                     VALUES
                         (0, 0, 0, 0, 0, 0, 0, 0);"""
-        self.write()
-
-    def writeArduino(self):
-        try:
-            self.write()
-            if self.cursor.rowcount == 0:
-                raise
-        except:
-            try:
-                temp = self.sql
-                try:
-                    self.createArduino()
-                    self.resetArduino()
-                except:
-                    pass
-                self.sql = temp
-                self.write()
-            except:
-                print self.sql
-                raise
-            else:
-                pass
+        self.write(sql)
 
     def createFlowbus(self):
-        self.sql = """
+        sql = """
         CREATE TABLE IF NOT EXISTS `runtime_flowbus`
         (
             `instrument`    smallint(2) NOT NULL DEFAULT '0',
@@ -163,120 +229,71 @@ class MKDatabase(object):
         )
         ENGINE=MEMORY
         DEFAULT CHARSET=utf8;""" % (self.storage_description, self.storage_values)
-        self.write()
-
-    def writeFlowbus(self):
-        try:
-            self.write()
-        except:
-            try:
-                temp = self.sql
-                self.createFlowbus()
-                self.sql = temp
-                self.write()
-            except:
-                print self.sql
-                raise
-            else:
-                pass
+        self.write(sql)
 
     def createRecording(self):
-        self.sql = """CREATE TABLE IF NOT EXISTS `runtime_recording` (
+        sql = """CREATE TABLE IF NOT EXISTS `runtime_recording` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `recording` tinyint(4) NOT NULL DEFAULT '0',
                 `id_recording` int(11) DEFAULT '0',
 
                 PRIMARY KEY (`id`)
                 ) ENGINE=MEMORY DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
-        self.write()
+        self.write(sql)
 
-        self.sql = """CREATE TABLE IF NOT EXISTS `recording` (
+        sql = """CREATE TABLE IF NOT EXISTS `recording` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `recording` tinyint(4) NOT NULL DEFAULT '0',
                 `filename` text NOT NULL,
                 PRIMARY KEY (`id`)
                 ) ENGINE=InnoDB DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
-        self.write()
+        self.write(sql)
 
     def resetRecording(self):
-        self.sql = """INSERT INTO `runtime_recording`
+        sql = """INSERT INTO `runtime_recording`
                         (`recording`)
                     VALUES
                         (0)"""
-        self.write()
-
-    def writeRecording(self):
-        try:
-            self.write()
-            if self.cursor.rowcount == 0:
-                raise
-        except:
-            try:
-                temp = self.sql
-                self.createRecording()
-                self.resetRecording()
-                self.sql = temp
-                self.write()
-            except:
-                raise
-            else:
-                pass
+        self.write(sql)
 
     def createMessage(self):
-        self.sql = """CREATE TABLE IF NOT EXISTS `cvd`.`runtime_message` (
+        sql = """CREATE TABLE IF NOT EXISTS `cvd`.`runtime_message` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `ready` tinyint(4) NOT NULL DEFAULT '0',
                 `id_message` int(11) DEFAULT '0',
 
                 PRIMARY KEY (`id`)
                 ) ENGINE=MEMORY DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
-        self.write()
+        self.write(sql)
 
-        self.sql = """CREATE TABLE IF NOT EXISTS  `cvd`.`message` (
+        sql = """CREATE TABLE IF NOT EXISTS  `cvd`.`message` (
                 `id` int(11) NOT NULL AUTO_INCREMENT,
                 `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `processed` tinyint(4) NOT NULL DEFAULT '0',
                 `text` text NOT NULL,
                 PRIMARY KEY (`id`)
                 ) ENGINE=InnoDB DEFAULT Charset=utf8 AUTO_INCREMENT=40;"""
-        self.write()
+        self.write(sql)
 
     def resetMessage(self):
-        self.sql = """INSERT INTO `cvd`.`runtime_message`
+        sql = """INSERT INTO `cvd`.`runtime_message`
                         (`ready`)
                     VALUES
                         (0)"""
-        self.write()
-        self.sql = """DELETE FROM `cvd`.`message`
+        self.write(sql)
+        sql = """DELETE FROM `cvd`.`message`
                     WHERE `processed` = 1"""
-        self.write()
-
-    def writeMessage(self):
-        try:
-            self.write()
-            if self.cursor.rowcount == 0:
-                raise
-        except:
-            try:
-                temp = self.sql
-                self.createMessage()
-                self.resetMessage()
-                self.sql = temp
-                self.write()
-            except:
-                raise
-            else:
-                pass
+        self.write(sql)
 
     def setSetpoint(self, temperature, pressure, argon, ethanol):
-        self.sql = """UPDATE `cvd`.`runtime_arduino`
+        sql = """UPDATE `cvd`.`runtime_arduino`
                     SET	`spTemperature` = %s,
                             `spPressure`	= %s,
                             `spEthanol`	= %s,
                             `spArgon`	= %s
                     LIMIT 1;"""  % (temperature, pressure, ethanol, argon)
-        self.writeArduino()
+        return self.writeArduino(sql)
 
     def setData(self, temperature, pressure, argon, ethanol):
         try:
@@ -289,74 +306,82 @@ class MKDatabase(object):
             self.pressure = 0.00
             self.argon = 0.00
             self.ethanol = 0.00
-        self.sql = """UPDATE `cvd`.`runtime_arduino`
+        sql = """UPDATE `cvd`.`runtime_arduino`
                 SET	`temperature`	= %s,
                         `pressure`	= %s,
                         `ethanol`	= %s,
                         `argon`		= %s
                 LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
-        self.writeArduino()
+        return self.writeArduino(sql)
 
     def setLogFile(self, fileName):
-        self.sql = """UPDATE `cvd`.`recording`
+        sql = """UPDATE `cvd`.`recording`
                     SET	`filename` = '%s'
                     WHERE `recording` = 1
                     LIMIT 1;""" % (fileName)
-        self.write()
+        self.write(sql)
         self.fileName = fileName
 
     def isRecording(self):
-        self.sql = """SELECT `recording`
+        sql = """SELECT `recording`
                     FROM `cvd`.`runtime_recording`
                     LIMIT 1;"""
         try:
-            self.read()
+            data = self.read(sql)
         except:
             return False
-        if not len(self.data) == 1:
+        if not len(data) == 1:
             return False
         else:
-            if self.data[0]:
+            if data[0]:
                 return True
             else:
                 return False
 
     def stopRecording(self):
-        self.sql = """UPDATE `cvd`.`runtime_recording`
+        sql = """UPDATE `cvd`.`runtime_recording`
                 SET	`recording` = 0;"""
-        self.writeRecording()
-        self.sql = """UPDATE `cvd`.`recording`
+        if not self.writeRecording(sql):
+            return False
+        sql = """UPDATE `cvd`.`recording`
                 SET	`recording` = 0
                 WHERE `recording` = 1;"""
-        self.writeRecording()
+        if not self.writeRecording(sql):
+            return False
         self.recordingID = -1
+        return True
 
     def startRecording(self, filename = ''):
         self.stopRecording
 
-        self.sql = """INSERT INTO `cvd`.`recording` (
+        sql = """INSERT INTO `cvd`.`recording` (
                 `id` ,`time` , `recording` , `filename` )
                 VALUES (
                 NULL , CURRENT_TIMESTAMP , 1, '%s')""" % filename
-        self.writeRecording()
-        self.sql = """SELECT `id`
+        if not self.writeRecording(sql):
+            return False
+        sql = """SELECT `id`
         FROM `cvd`.`recording`
                 WHERE `recording` = 1
                 LIMIT 1;"""
-        self.read()
-        self.sql = """UPDATE `cvd`.`runtime_recording`
+        data = self.read(sql)
+        if not len(data) == 1:
+            return False
+        sql = """UPDATE `cvd`.`runtime_recording`
                 SET `id_recording` = %i,
                     `recording` = 1
-                LIMIT 1;""" % self.data
-        self.writeRecording()
+                LIMIT 1;""" % data
+        if not self.writeRecording(sql):
+            return False
+        return True
 
     def getRecordingID(self):
-        self.sql = """SELECT `id_recording`
+        sql = """SELECT `id_recording`
                     FROM `cvd`.`runtime_recording`
                     LIMIT 1;"""
-        self.read()
-        if (len(self.data) == 1):
-            return int(self.data[0])
+        data = self.read(sql)
+        if (len(data) == 1):
+            return int(data[0])
         else:
             return -1
 
@@ -367,53 +392,54 @@ class MKDatabase(object):
         recordingID = self.getRecordingID()
         # update filename from disc table if not already saved in class
         if not (recordingID == self.recordingID) or len(self.fileName) == 0:
-            self.sql = """SELECT `filename`
+            sql = """SELECT `filename`
                     FROM `cvd`.`recording`
                     WHERE `id` = %i;""" % recordingID
-            self.read()
-            if len(self.data) == 1:
-                self.fileName = self.data[0]
+            data = self.read(sql)
+            if len(data) == 1:
+                self.fileName = data[0]
             else:
                 self.fileName = ''
             self.recordingID = recordingID
         return self.fileName
 
     def setMessage(self, message):
-        self.sql = """INSERT INTO `cvd`.`message`
+        sql = """INSERT INTO `cvd`.`message`
                 (`text`) VALUES ('%s');"""  % (message)
-        self.writeMessage()
-        self.updateMessage()
+        if self.writeMessage(sql):
+            return self.updateMessage()
+        return False
 
     def updateMessage(self):
-        self.sql = """SELECT `id` FROM `cvd`.`message`
+        sql = """SELECT `id` FROM `cvd`.`message`
                 WHERE `processed` = 0
                 LIMIT 1;"""
-        self.read()
-        if (len(self.data) == 1):
-            id_message = self.data[0]
+        data = self.read(sql)
+        if (len(data) == 1):
+            id_message = data[0]
             ready = 1
         else:
             ready = 0
             id_message = -1
 
-        self.sql = """UPDATE `cvd`.`runtime_message`
+        sql = """UPDATE `cvd`.`runtime_message`
                 SET `ready` = %i,
                     `id_message` = %i
                 LIMIT 1;""" % (ready, id_message)
-        self.writeMessage()
+        return self.writeMessage(sql)
 
     def isReady(self):
         if self.ready:
             return True
-        self.sql = """SELECT `ready`, `id_message`
+        sql = """SELECT `ready`, `id_message`
                 FROM `cvd`.`runtime_message`;"""
         try:
-            self.read()
+            data = self.read(sql)
         except:
             return False
-        if not len(self.data) == 2:
-                self.data = (0,-1)
-        (self.ready, self.messageID) = self.data
+        if not len(data) == 2:
+                data = (0,-1)
+        (self.ready, self.messageID) = data
         if self.ready:
             return True
         else:
@@ -421,21 +447,22 @@ class MKDatabase(object):
 
     def getMessage(self):
         self.message = ""
+        # read from runtime (memory table)
         if self.isReady():
-            # get message
-            self.sql = """SELECT `text`
+            # ready flag did also read out messageID.
+            # get message string from cvd.message
+            sql = """SELECT `text`
                 FROM `cvd`.`message`
                 WHERE `id` = %i
                 LIMIT 1;""" % self.messageID
-            self.read()
-            if (len(self.data) == 1):
-                self.message = self.data[0]
-            # mark as processed
-            self.sql = """UPDATE `cvd`.`message`
-                SET `processed` = 1
-                WHERE `id` = %i;""" % self.messageID
-            self.writeMessage()
-            # search for pending messages
+            data = self.read(sql)
+            if (len(data) == 1):
+                self.message = data[0]
+                # mark message in cvd.message as processed 
+                sql = """UPDATE `cvd`.`message`
+                    SET `processed` = 1
+                    WHERE `id` = %i;""" % self.messageID
+                self.writeMessage(sql)
             self.updateMessage()
         # reset readout
         self.ready = False
@@ -457,21 +484,21 @@ class MKDatabase(object):
             dataType = 3
             data = dataInput.encode("hex")
         else:
-            raise ValueError("can not identify dataType at setFlowBus")
+            raise ValueError("can not identify dataType at setFlowBus()")
 
-        self.sql = """
+        sql = """
         INSERT INTO `cvd`.`runtime_flowbus`
         (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`, `parameter`)
         VALUES
         (%i, %i, %i, %i, UNHEX(LPAD('%s',%i,'0')), %.2f, UNHEX(LPAD('%s',%i,'0')))""" % (instrument, process, flowBus, dataType, data, self.storage_values * 2, time, parameterName, self.storage_description * 2)
-        self.sql += """
+        sql += """
         ON DUPLICATE KEY UPDATE
         `data` = UNHEX(LPAD('%s',%i,'0')),
         `time` = %.2f;""" % (data, self.storage_values * 2, time)
-        self.writeFlowbus()
+        self.writeFlowbus(sql)
 
     def getFlowbus(self, instrument, process, flowBus):
-        self.sql = """
+        sql = """
         SELECT `dataType`,TRIM(LEADING '0' FROM HEX(`data`)),`time`,TRIM(LEADING '0' FROM HEX(`parameter`))
         FROM `cvd`.`runtime_flowbus`
         WHERE
@@ -479,11 +506,11 @@ class MKDatabase(object):
         AND `process`       = %i
         AND `flowBus`       = %i);
         """ % (instrument, process, flowBus)
-        self.read()
-        if (len(self.data) == 4):
-            (dataType, dataOut, timeOut, parameter) = self.data
+        data = self.read(sql)
+        if (len(data) == 4):
+            (dataType, dataOut, timeOut, parameter) = data
         else:
-            raise
+            return (-1,-1,-1)
 
         parameter = parameter.decode("hex")
         time = decimal.Decimal(timeOut)
@@ -496,8 +523,7 @@ class MKDatabase(object):
         elif(dataType == 3):
             data = dataOut.decode("hex")
         else:
-            data = 0
-            raise
+            raise ValueError("can not identify dataType at getFlowBus()")
 
         return (parameter, data, time)
 
@@ -507,18 +533,9 @@ class MKDatabase(object):
                              spTemperature, spPressure, spEthanol, spArgon
                       FROM `cvd`.`runtime_arduino`
                       LIMIT 1"""
-        try:
-            self.sql = sql
-            self.read()
-        except:
-            try:
-                self.createArduino()
-                self.resetArduino()
-                self.sql = sql
-                self.read()
-            except:
-                self.data = (-1,-1,-1,-1, -1,-1,-1,-1)
-                print "database readout failed for arduino!"
-        (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = self.data
-        self.close()
+        data = self.read(sql)
+        if len(data) == 0:
+            print "database readout failed for arduino!"
+            data = (-1,-1,-1,-1, -1,-1,-1,-1)
+        (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = data
 
