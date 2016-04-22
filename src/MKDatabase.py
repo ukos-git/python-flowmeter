@@ -89,16 +89,18 @@ class MKDatabase(object):
         try:
             cursor = self.db.cursor()
             cursor.execute(sql)
-            if not cursor.rowcount:
-                raise
         except:
             print "database read failed."
+            print sql
             self.close()
             data = []
         else:
             data = cursor.fetchone()
 
-        return data
+        if cursor.rowcount:
+            return data
+        else:
+            return []
 
     def writeArduino(self, sql):
         try:
