@@ -50,6 +50,12 @@ class MKArduino():
                 if self.debugging:
                     print "sleeping ..."
                 time.sleep(0.1)
+            else:
+                if self.debugging:
+                    if self.Serial.isReady():
+                        print "serial ready with %i messages" % len(self.Serial.receiveBuffer)
+                    if self.Database.isReady():
+                        print "database ready"
             if self.Database.isReady():
                 if self.debugging:
                     print "database ready ..."
