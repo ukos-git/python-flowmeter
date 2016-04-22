@@ -6,6 +6,7 @@ import os
 import socket
 import decimal
 import struct
+from time import sleep
 from MKFlowMessage import FBconvertLong # converter for long numbers to float and percent
 #cvd-client->rbBmSDP7fSKp87b5
 
@@ -97,7 +98,7 @@ class MKDatabase(object):
             self.ip == "132.187.77.71"
         while not self.checkIP():
             print "ip not found"
-            time.sleep(0.1)
+            sleep(0.5)
         return self.ip
 
     def checkIP(self):
