@@ -70,6 +70,8 @@ class swntReactorGUI(object):
         self.ip.set(self.db.ip)
         if self.db.isRecording(): # needs to call database every time
             self.filename.set(self.db.getLogFile())
+        else:
+            self.filename.set('')
         # schedule next call
         self.master.after(100, self.update)
 
@@ -148,7 +150,6 @@ class swntReactorGUI(object):
     def buttonRecord(self, event=None):
         if self.db.isRecording():
             self.db.stopRecording()
-            self.filename.set("")
         else:
             self.db.startRecording()
         self.timer = 0
