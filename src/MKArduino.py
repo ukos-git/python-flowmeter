@@ -46,21 +46,23 @@ class MKArduino():
         if self.debugging:
             print "entering loop ..."
         while self.isAlive():
-            if not self.Serial.isReady() and not self.Database.isReady():
+            serialReady = self.Serial.isReady()
+            databaseReady = self.Database.isReady()
+            if not serialReady and not databaseReady:
                 if self.debugging:
                     print "sleeping ..."
                 time.sleep(0.1)
             else:
                 if self.debugging:
-                    if self.Serial.isReady():
+                    if serialReady:
                         print "serial ready with %i messages" % len(self.Serial.receiveBuffer)
-                    if self.Database.isReady():
+                    if databaseReady:
                         print "database ready"
-            if self.Database.isReady():
+            if databaseReady:
                 if self.debugging:
                     print "database ready ..."
                 self.Serial.send(self.Database.getMessage())
-            if self.Serial.isReady():
+            if serialReady:
                 message = self.Serial.getMessage()
                 self.Parser.input(message)
                 oneline = self.Parser.oneline()

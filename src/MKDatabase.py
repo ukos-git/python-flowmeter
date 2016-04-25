@@ -99,11 +99,9 @@ class MKDatabase(object):
             data = cursor.fetchone()
             affectedRows = cursor.rowcount
             cursor.close()
-            self.close()
         except:
             print "database read failed."
             print sql
-            cursor.close()
             self.close()
             data = []
 
