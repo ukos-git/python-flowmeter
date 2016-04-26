@@ -87,6 +87,7 @@ class MKDatabase(object):
         if not self.open():
             raise
         try:
+            self.db.ping(TRUE)
             cursor = self.db.cursor()
             cursor.execute(sql)
             affectedRows = cursor.rowcount
@@ -111,6 +112,7 @@ class MKDatabase(object):
         if not self.open():
             return []
         try:
+            self.db.ping(TRUE)
             cursor = self.db.cursor()
             cursor.execute(sql)
             data = cursor.fetchone()
