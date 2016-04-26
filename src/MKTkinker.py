@@ -5,8 +5,8 @@ import MKDatabase
 
 class swntReactorGUI(object):
     def __init__(self, master, **kwargs):
-        # database connection
-        self.db = MKDatabase.MKDatabase()
+        # database connection as client
+        self.db = MKDatabase.MKDatabase(True)
         # fullscreen
         self.master=master
         pad=30

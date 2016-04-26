@@ -17,13 +17,15 @@ class MKDatabase(object):
     ready = False
     messageID = -1
     hostname = ""
+    client = False
     recording = False
     recordingID = -1
     fileName = ""
     storage_description = 50
     storage_values = 30
 
-    def __init__(self):
+    def __init__(self, isClient = False):
+        self.client = isClient
         self.test()
         decimal.getcontext().prec = 2
 
@@ -33,8 +35,19 @@ class MKDatabase(object):
         try:
             dbHost = self.getIP()
             dbName = "cvd"
-            dbUser = "cvd-client"
-            dbPass = "rbBmSDP7fSKp87b5"
+            if self.client:
+                dbUser = "cvd-client"
+                dbPass = "rbBmSDP7fSKp87b5"
+            else:
+                if self.getHostname() == "lab117":
+                    dbUser = "cvd-server"
+                    dbPass = "uhNYLSHRn2f3LhmS"
+                elif self.getHostname() == "uk-work":
+                    dbUser = "cvd-uk-work"
+                    dbPass = "ARHFpNwB5ZbZQdqh"
+                else:
+                    dbUser = "cvd-other"
+                    dbPass = "bmF94vVXAB5yf7Mx"
             self.db = MySQLdb.connect(
                 host = dbHost,
                 user = dbUser,
