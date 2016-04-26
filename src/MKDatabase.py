@@ -53,7 +53,8 @@ class MKDatabase(object):
                 user = dbUser,
                 passwd = dbPass,
                 db = dbName,
-                client_flag = CLIENT.FOUND_ROWS
+                client_flag = CLIENT.FOUND_ROWS,
+                connect_timeout = 1
                 )
         except:
             print "database open failed."
