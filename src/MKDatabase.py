@@ -11,7 +11,7 @@ from MKFlowMessage import FBconvertLong # converter for long numbers to float an
 #cvd-client->rbBmSDP7fSKp87b5
 
 class MKDatabase(object):
-    ip = "132.187.77.71"
+    ip = ""
     sql = ""
     connected = False
     ready = False
@@ -33,7 +33,9 @@ class MKDatabase(object):
         if self.isOpen():
             return True
         try:
-            dbHost = self.getIP()
+            if not self.getIP():
+                raise
+            dbHost = self.ip
             dbName = "cvd"
             if self.client:
                 dbUser = "cvd-client"
@@ -211,10 +213,10 @@ class MKDatabase(object):
             self.ip = 'localhost'
         else:
             self.ip == "132.187.77.71"
-        while not self.checkIP():
+        if not self.checkIP():
             print "ip not found"
-            sleep(0.5)
-        return self.ip
+            return False
+        return True
 
     def checkIP(self):
         if os.system("ping -c 1 -W 1 " + self.ip + " > /dev/null") == 0:
