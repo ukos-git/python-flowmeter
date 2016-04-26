@@ -11,7 +11,7 @@ from MKFlowMessage import FBconvertLong # converter for long numbers to float an
 #cvd-client->rbBmSDP7fSKp87b5
 
 class MKDatabase(object):
-    ip = ""
+    ip = "132.187.77.71"
     sql = ""
     connected = False
     ready = False
@@ -69,7 +69,7 @@ class MKDatabase(object):
             if self.isOpen():
                 self.db.close()
         except:
-            if self.checkIP():
+            if self.checkIP(self.ip):
                 print "database close failed."
             else:
                 print "connection lost. Database could not be closed normal"
@@ -202,24 +202,28 @@ class MKDatabase(object):
             self.hostname = socket.gethostname()
         return self.hostname
 
-    def isRaspberry(self):
-        if (self.getHostname() == "raspberrypi"):
+    def isServer(self):
+        if (self.getHostname() == "lab117"):
             return True
         else:
             return False
 
     def getIP(self):
-        if (self.hostname == "lab117"):
+        if self.isServer():
             self.ip = 'localhost'
         else:
             self.ip == "132.187.77.71"
-        if not self.checkIP():
+        if not self.checkIP(self.ip):
             print "ip not found"
             return False
         return True
 
-    def checkIP(self):
-        if os.system("ping -c 1 -W 1 " + self.ip + " > /dev/null") == 0:
+    def checkIP(self, ip):
+        if ip == "localhost":
+            return True
+        command = "ping -c 1 -W 1 " + ip
+        print "executing '" + command + "'"
+        if os.system(command + " > /dev/null") == 0:
             return True
         else:
             return False
