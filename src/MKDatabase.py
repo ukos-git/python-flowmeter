@@ -62,6 +62,7 @@ class MKDatabase(object):
             print "database open failed."
             return False
         else:
+            print "connected as user: %s" % dbUser
             self.connected = True
             return True
     def close(self):
