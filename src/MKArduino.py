@@ -18,10 +18,10 @@ class MKArduino():
         self.setFile = False
         self.alive = False
         self.sleeping = False
-        self.debugging = False
+        self.verbose = 0
 
-    def debug(self):
-        self.debugging = True
+    def debug(self, verbose = 1):
+        self.verbose = verbose
 
     def start(self):
         try:
@@ -46,22 +46,25 @@ class MKArduino():
         return self.alive
 
     def loop(self):
-        if self.debugging:
+        if self.verbose:
             print('entering loop ...')
         while self.isAlive():
             serialReady = self.Serial.isReady()
             databaseReady = self.Database.isReady()
             if not serialReady and not databaseReady:
-                if self.debugging:
+                if self.verbose:
                     if not self.sleeping:
-                        print('sleeping .', end = '')
+                        if self.verbose > 1:
+                            print('sleeping .', end = '')
+                        else:
+                            print('.', end = '')
                         self.sleeping = True
                     else:
                         print('.', end = '')
                     sys.stdout.flush()
                 time.sleep(0.1)
             else:
-                if self.debugging:
+                if self.verbose:
                     if self.sleeping:
                         print('.', end = '\n')
                         sys.stdout.flush()
@@ -71,14 +74,12 @@ class MKArduino():
                     if databaseReady:
                         print('database ready')
             if databaseReady:
-                if self.debugging:
-                    print('database ready ...')
                 self.Serial.send(self.Database.getMessage())
             if serialReady:
                 message = self.Serial.getMessage()
                 self.Parser.input(message)
                 oneline = self.Parser.oneline()
-                if self.debugging:
+                if self.verbose > 2:
                     print(oneline)
                 if not self.Parser.isHeadline() and self.Parser.getStatus():
                     setData = self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
