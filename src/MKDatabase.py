@@ -135,7 +135,6 @@ class MKDatabase(object):
                 self.createRecording()
                 self.resetRecording()
                 self.write(sql)
-                self.close()
             except:
                 self.close()
                 return False
@@ -183,12 +182,12 @@ class MKDatabase(object):
         print "MySQL version : %s " % data
 
     def getHostname(self):
-        return socket.gethostname()
+        if self.hostname == "":
+            self.hostname = socket.gethostname()
+        return self.hostname
 
     def isRaspberry(self):
-        if self.hostname == "":
-            self.hostname = getHostname()
-        if (self.hostname == "raspberrypi"):
+        if (self.getHostname() == "raspberrypi"):
             return True
         else:
             return False
@@ -409,12 +408,12 @@ class MKDatabase(object):
             return -1
 
     def getLogFile(self):
-        if not self.isRecording():
-            return ""
         # get id from memory table
         recordingID = self.getRecordingID()
         # update filename from disc table if not already saved in class
         if not (recordingID == self.recordingID) or len(self.fileName) == 0:
+            print "querying filename from sql table"
+            self.close()
             sql = """SELECT `filename`
                     FROM `cvd`.`recording`
                     WHERE `id` = %i;""" % recordingID
