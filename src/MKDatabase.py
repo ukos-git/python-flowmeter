@@ -70,15 +70,21 @@ class MKDatabase(object):
             if self.isOpen():
                 self.db.close()
         except:
-            if self.checkIP(self.ip):
-                print "database close failed."
-            else:
+            if not self.checkIP(self.ip):
                 print "connection lost. Database could not be closed normal"
                 self.connected = False
         else:
             self.connected = False
 
     def isOpen(self):
+        try:
+            if not self.connected:
+                raise
+            self.db.ping(True)
+        except:
+            self.connected = False
+        else:
+            self.connected = True
         return self.connected
 
     def write(self, sql, update = False):
@@ -87,7 +93,6 @@ class MKDatabase(object):
         if not self.open():
             raise
         try:
-            self.db.ping(TRUE)
             cursor = self.db.cursor()
             cursor.execute(sql)
             affectedRows = cursor.rowcount
@@ -112,7 +117,6 @@ class MKDatabase(object):
         if not self.open():
             return []
         try:
-            self.db.ping(TRUE)
             cursor = self.db.cursor()
             cursor.execute(sql)
             data = cursor.fetchone()
@@ -194,11 +198,13 @@ class MKDatabase(object):
             return True
 
     def test(self):
+        print "-- starting self-test --"
         self.open()
         sql="SELECT VERSION()"
         data = self.read(sql)
         self.close()
         print "MySQL version : %s " % data
+        print "-- self test complete --"
 
     def getHostname(self):
         if self.hostname == "":
