@@ -75,9 +75,10 @@ class MKDatabase(object):
 
     def isOpen(self):
         try:
-            if not self.connected:
+            if self.connected:
+                self.db.ping(True)
+            else:
                 raise
-            self.db.ping(True)
         except:
             self.connected = False
         else:
@@ -85,7 +86,6 @@ class MKDatabase(object):
         return self.connected
 
     def write(self, sql, update = False):
-        # on update statements rise also if no lines were affected
         affectedRows = 0
         if not self.open():
             raise
@@ -105,9 +105,9 @@ class MKDatabase(object):
                 print "database rollback failed."
             raise
         else:
+            # on update statements rise also if no lines were affected
             if update and affectedRows == 0:
                 raise
-            return affectedRows
 
     def read(self, sql):
         affectedRows = 0
