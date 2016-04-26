@@ -85,7 +85,8 @@ class MKArduino():
                     setData = self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
                     setSP = self.Database.setSetpoint(self.Parser.get(3), self.Parser.get(6), self.Parser.get(9), self.Parser.get(12))
                     if not setData or not setSP:
-                        # database write failed. add message to buffer again
+                        if self.verbose > 2:
+                            print("database write failed. add message to buffer again.")
                         self.Serial.receive(message)
                 if self.Database.isRecording():
                     if self.newFile:

@@ -68,7 +68,7 @@ class swntReactorGUI(object):
         self.temperatureDisplay.set("{0:.0f} ({1:.0f})".format(self.db.temperature, self.db.spTemperature))
         self.argonDisplay.set("{0:.1f} ({1:.0f})".format(self.db.argon, self.db.spArgon))
         self.ethanolDisplay.set("{0:.1f} ({1:.0f})".format(self.db.ethanol, self.db.spEthanol))
-        self.ip.set(self.db.ip)
+        self.ip.set(self.db.getIP())
         if self.db.isRecording(): # needs to call database every time
             self.filename.set(self.db.getLogFile())
         else:

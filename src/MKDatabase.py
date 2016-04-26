@@ -11,7 +11,6 @@ from MKFlowMessage import FBconvertLong # converter for long numbers to float an
 #cvd-client->rbBmSDP7fSKp87b5
 
 class MKDatabase(object):
-    ip = "132.187.77.71"
     sql = ""
     connected = False
     ready = False
@@ -33,9 +32,7 @@ class MKDatabase(object):
         if self.isOpen():
             return True
         try:
-            if not self.getIP():
-                raise
-            dbHost = self.ip
+            dbHost = self.getIP()
             dbName = "cvd"
             if self.client:
                 dbUser = "cvd-client"
@@ -70,7 +67,7 @@ class MKDatabase(object):
             if self.isOpen():
                 self.db.close()
         except:
-            if not self.checkIP(self.ip):
+            if not self.checkIP(self.getIP()):
                 print "connection lost. Database could not be closed normal"
                 self.connected = False
         else:
@@ -219,15 +216,14 @@ class MKDatabase(object):
 
     def getIP(self):
         if self.isServer():
-            self.ip = 'localhost'
+            ip = 'localhost'
         else:
-            self.ip == "132.187.77.71"
-        if not self.checkIP(self.ip):
-            print "ip not found"
-            return False
-        return True
+            ip = "132.187.77.71"
+        return ip
 
-    def checkIP(self, ip):
+    def checkIP(self, ip = ""):
+        if len(ip) == 0:
+            ip = self.getIP()
         if ip == "localhost":
             return True
         command = "ping -c 1 -W 1 " + ip
@@ -235,6 +231,8 @@ class MKDatabase(object):
         if os.system(command + " > /dev/null") == 0:
             return True
         else:
+            print "ip not found. sleeping penalty."
+            time.sleep(1)
             return False
 
     def createArduino(self):

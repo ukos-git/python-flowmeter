@@ -10,7 +10,7 @@ threads.append(arduino)
 
 for t in threads:
     print "starting ..."
-    t.debug()
+    t.debug(5)
     t.start()
 
 try:
