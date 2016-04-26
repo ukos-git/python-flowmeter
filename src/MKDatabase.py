@@ -135,6 +135,7 @@ class MKDatabase(object):
                 self.createRecording()
                 self.resetRecording()
                 self.write(sql)
+                self.close()
             except:
                 self.close()
                 return False
