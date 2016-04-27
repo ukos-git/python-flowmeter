@@ -3,6 +3,7 @@ from __future__ import print_function
 import threading
 import time
 import sys
+from datetime import datetime
 
 from MKDatabase import MKDatabase
 from MKParser import MKParser
@@ -45,12 +46,28 @@ class MKArduino():
     def isAlive(self):
         return self.alive
 
+    def getPerformance(self):
+        if self.verbose < 0:
+            self.perfCounter += 1
+            microseconds = datetime.now().microsecond
+            print(self.perfCounter, "\t", int((microseconds - self.performance)/100)/10.0)
+            self.performance = microseconds
+
+    def resetPerformance(self):
+        if self.verbose < 0:
+            print('---')
+            self.perfCounter = 0
+            self.performance = 0
+
     def loop(self):
         if self.verbose:
             print('entering loop ...')
         while self.isAlive():
+            self.resetPerformance()
             serialReady = self.Serial.isReady()
+            self.getPerformance()
             databaseReady = self.Database.isReady()
+            self.getPerformance()
             if not serialReady and not databaseReady:
                 if self.verbose:
                     if not self.sleeping:
@@ -62,7 +79,9 @@ class MKArduino():
                     else:
                         print('.', end = '')
                     sys.stdout.flush()
+                self.getPerformance()
                 time.sleep(0.1)
+                self.getPerformance()
             else:
                 if self.verbose:
                     if self.sleeping:
@@ -73,21 +92,30 @@ class MKArduino():
                         print('serial ready with %i messages' % len(self.Serial.receiveBuffer))
                     if databaseReady:
                         print('database ready')
+                self.getPerformance()
             if databaseReady:
                 self.Serial.send(self.Database.getMessage())
             if serialReady:
+                self.getPerformance()
                 message = self.Serial.getMessage()
+                self.getPerformance()
                 self.Parser.input(message)
+                self.getPerformance()
                 oneline = self.Parser.oneline()
+                self.getPerformance()
                 if self.verbose > 2:
                     print(oneline)
                 if self.Parser.getStatus():
+                    self.getPerformance()
                     setData = self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
+                    self.getPerformance()
                     setSP = self.Database.setSetpoint(self.Parser.get(3), self.Parser.get(6), self.Parser.get(9), self.Parser.get(12))
+                    self.getPerformance()
                     if not setData or not setSP:
                         if self.verbose > 2:
                             print("database write failed. add message to buffer again.")
                         self.Serial.receive(message)
+                self.getPerformance()
                 if self.Database.isRecording():
                     if self.newFile:
                         print('starting new LogFile.')
@@ -102,4 +130,5 @@ class MKArduino():
                     self.Logfile.write(oneline)
                 else:
                     self.newFile = True
+                self.getPerformance()
 

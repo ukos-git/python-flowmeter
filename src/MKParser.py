@@ -22,15 +22,15 @@ class MKParser:
 		except:
 			self.error.write('error opening log file')
 	def input(self,strInput):
-		self.log.write('input received')
-		if self.parse(strInput):			
+		#self.log.write('input received')
+		if self.parse(strInput):
 			# process content and save as array
 			self.status = True
 		else:
 			self.error.write('length missmatch in string. Counting ' + str(self.length) + ' items')
 			self.status = False
 		return self.status
-	def parse(self,strInput,intArduinoVersion=None): 
+	def parse(self,strInput,intArduinoVersion=None):
 		if intArduinoVersion is None:
 			intArduinoVersion = 2
 			# Default Version (from master thesis) is 2
