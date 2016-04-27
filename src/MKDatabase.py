@@ -141,12 +141,11 @@ class MKDatabase(object):
         if not self.isOpen():
             if not self.open():
                 raise
-        timeout = 1
         conn_parent, conn_child = multiprocessing.Pipe(False)
         subproc = multiprocessing.Process(target = self.read_without_timeout,
                                           args = (self.db, sql, conn_child))
         subproc.start()
-        subproc.join(timeout)
+        subproc.join(1)
         if conn_parent.poll():
             return conn_parent.recv()
         else:

@@ -69,7 +69,7 @@ class MKArduino():
             databaseReady = self.Database.isReady()
             self.getPerformance()
             if not serialReady and not databaseReady:
-                if self.verbose:
+                if self.verbose > 0:
                     if not self.sleeping:
                         if self.verbose > 1:
                             print('sleeping .', end = '')
@@ -83,7 +83,7 @@ class MKArduino():
                 time.sleep(0.1)
                 self.getPerformance()
             else:
-                if self.verbose:
+                if self.verbose > 0:
                     if self.sleeping:
                         print('.', end = '\n')
                         sys.stdout.flush()
