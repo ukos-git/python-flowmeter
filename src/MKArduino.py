@@ -48,19 +48,20 @@ class MKArduino():
 
     def getPerformance(self):
         if self.verbose < 0:
+            microsecond = datetime.now().microsecond
+            print(self.perfCounter, "\t", int((microsecond - self.performance)/100)/10.0)
+            self.performance = microsecond
             self.perfCounter += 1
-            microseconds = datetime.now().microsecond
-            print(self.perfCounter, "\t", int((microseconds - self.performance)/100)/10.0)
-            self.performance = microseconds
 
     def resetPerformance(self):
         if self.verbose < 0:
             print('---')
             self.perfCounter = 0
-            self.performance = 0
+            self.performance = datetime.now().microsecond
+            self.getPerformance()
 
     def loop(self):
-        if self.verbose:
+        if self.verbose > 1:
             print('entering loop ...')
         while self.isAlive():
             self.resetPerformance()
