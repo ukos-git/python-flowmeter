@@ -7,6 +7,8 @@ import socket
 import decimal
 import struct
 from time import sleep
+import multiprocessing
+
 from MKFlowMessage import FBconvertLong # converter for long numbers to float and percent
 #cvd-client->rbBmSDP7fSKp87b5
 
@@ -29,8 +31,6 @@ class MKDatabase(object):
         decimal.getcontext().prec = 2
 
     def open(self):
-        if self.isOpen():
-            return True
         try:
             if not self.checkIP():
                 print "server unavailable"
@@ -77,58 +77,81 @@ class MKDatabase(object):
             self.connected = False
 
     def isOpen(self):
-        if not self.connected:
-            return False
-        try:
-            stats = self.db.stat()
-            self.connected = stats != 'MySQL server has gone away'
-        except:
-            self.connected = False
+        #if not self.connected:
+        #    return False
+        #try:
+        #    stats = self.db.stat()
+        #    if stats == 'MySQL server has gone away':
+        #        self.close()
+        #except:
+        #    self.connected = False
         return self.connected
 
-    def write(self, sql, update = False):
-        affectedRows = 0
-        if not self.open():
-            raise
+    def write_without_timeout(self, db, sql, connection):
         try:
-            cursor = self.db.cursor()
+            cursor = db.cursor()
             cursor.execute(sql)
             affectedRows = cursor.rowcount
             cursor.close()
-            self.db.commit()
+            db.commit()
         except:
-            print "database write failed."
-            print sql
+            affectedRows = 0
             try:
                 self.db.rollback()
-                self.close()
             except:
-                print "database rollback failed."
-            raise
-        else:
-            # on update statements rise also if no lines were affected
-            if update and affectedRows == 0:
-                raise
+                pass
+        connection.send(affectedRows)
+        connection.close()
 
-    def read(self, sql):
+    def read_without_timeout(self, db, sql, connection):
         affectedRows = 0
-        if not self.open():
-            return []
         try:
-            cursor = self.db.cursor()
+            cursor = db.cursor()
             cursor.execute(sql)
             data = cursor.fetchone()
-            affectedRows = cursor.rowcount
+            connection.send(data)
             cursor.close()
+            connection.close()
         except:
-            print "database read failed."
-            print sql
-            self.close()
-            data = []
+            connection.close()
+            return False
+        return True
 
-        if affectedRows:
-            return data
+    # from alex martelli on http://stackoverflow.com/questions/1507091/python-mysqldb-query-timeout
+    def write(self, sql, update = False):
+        if not self.isOpen():
+            if not self.open():
+                raise
+        timeout = 1
+        conn_parent, conn_child = multiprocessing.Pipe(False)
+        subproc = multiprocessing.Process(target = self.write_without_timeout,
+                                          args = (self.db, sql, conn_child))
+        subproc.start()
+        subproc.join(timeout)
+        if conn_parent.poll():
+            affectedRows = conn_parent.recv()
+            # on update statements rise if no lines were affected
+            if update and affectedRows == 0:
+                raise UpdateError('UPDATE statement failed')
+            else:
+                return affectedRows
+        subproc.terminate()
+        raise TimeoutError("Query %r ran for >%r" % (sql, timeout))
+
+    def read(self, sql):
+        if not self.isOpen():
+            if not self.open():
+                raise
+        timeout = 1
+        conn_parent, conn_child = multiprocessing.Pipe(False)
+        subproc = multiprocessing.Process(target = self.read_without_timeout,
+                                          args = (self.db, sql, conn_child))
+        subproc.start()
+        subproc.join(timeout)
+        if conn_parent.poll():
+            return conn_parent.recv()
         else:
+            subproc.terminate()
             return []
 
     def writeArduino(self, sql):
@@ -233,7 +256,7 @@ class MKDatabase(object):
             return True
         else:
             print "ip not found. sleeping penalty."
-            time.sleep(1)
+            sleep(1)
             return False
 
     def createArduino(self):
@@ -578,7 +601,6 @@ class MKDatabase(object):
         return (parameter, data, time)
 
     def getAll(self):
-        self.open()
         sql = """SELECT temperature, pressure, ethanol, argon,
                              spTemperature, spPressure, spEthanol, spArgon
                       FROM `cvd`.`runtime_arduino`
@@ -588,4 +610,16 @@ class MKDatabase(object):
             print "database readout failed for arduino!"
             data = (-1,-1,-1,-1, -1,-1,-1,-1)
         (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = data
+
+class UpdateError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class TimeoutError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
