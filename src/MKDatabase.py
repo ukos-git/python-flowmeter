@@ -32,6 +32,9 @@ class MKDatabase(object):
         if self.isOpen():
             return True
         try:
+            if not self.checkIP():
+                print "server unavailable"
+                raise
             dbHost = self.getIP()
             dbName = "cvd"
             if self.client:
@@ -57,6 +60,7 @@ class MKDatabase(object):
                 )
         except:
             print "database open failed."
+            self.close()
             return False
         else:
             print "connected as user: %s" % dbUser
@@ -64,25 +68,22 @@ class MKDatabase(object):
             return True
     def close(self):
         try:
-            if self.isOpen():
-                self.db.close()
+            self.db.close()
         except:
-            if not self.checkIP(self.getIP()):
+            if not self.checkIP():
                 print "connection lost. Database could not be closed normal"
                 self.connected = False
         else:
             self.connected = False
 
     def isOpen(self):
+        if not self.connected:
+            return False
         try:
-            if self.connected:
-                self.db.ping(True)
-            else:
-                raise
+            stats = self.db.stat()
+            self.connected = stats != 'MySQL server has gone away'
         except:
             self.connected = False
-        else:
-            self.connected = True
         return self.connected
 
     def write(self, sql, update = False):
