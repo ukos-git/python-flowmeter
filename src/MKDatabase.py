@@ -122,12 +122,11 @@ class MKDatabase(object):
         if not self.isOpen():
             if not self.open():
                 raise
-        timeout = 1
         conn_parent, conn_child = multiprocessing.Pipe(False)
         subproc = multiprocessing.Process(target = self.write_without_timeout,
                                           args = (self.db, sql, conn_child))
         subproc.start()
-        subproc.join(timeout)
+        subproc.join(1)
         if conn_parent.poll():
             affectedRows = conn_parent.recv()
             # on update statements rise if no lines were affected
@@ -159,7 +158,7 @@ class MKDatabase(object):
             self.write(sql, True)
         except:
             try:
-                # create database and try again.
+                print "writeArduino failed: create database and try again."
                 self.createArduino()
                 self.resetArduino()
                 self.write(sql)

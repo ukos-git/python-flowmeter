@@ -81,7 +81,7 @@ class MKArduino():
                 oneline = self.Parser.oneline()
                 if self.verbose > 2:
                     print(oneline)
-                if not self.Parser.isHeadline() and self.Parser.getStatus():
+                if self.Parser.getStatus():
                     setData = self.Database.setData(self.Parser.get(2), self.Parser.get(5), self.Parser.get(8), self.Parser.get(11))
                     setSP = self.Database.setSetpoint(self.Parser.get(3), self.Parser.get(6), self.Parser.get(9), self.Parser.get(12))
                     if not setData or not setSP:
