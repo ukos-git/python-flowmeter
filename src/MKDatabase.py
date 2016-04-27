@@ -349,32 +349,292 @@ class MKDatabase(object):
                     WHERE `processed` = 1"""
         self.write(sql)
 
-    def setSetpoint(self, temperature, pressure, argon, ethanol):
-        sql = """UPDATE `cvd`.`runtime_arduino`
-                    SET	`spTemperature` = %s,
-                            `spPressure`	= %s,
-                            `spEthanol`	= %s,
-                            `spArgon`	= %s
-                    LIMIT 1;"""  % (temperature, pressure, ethanol, argon)
-        return self.writeArduino(sql)
-
-    def setData(self, temperature, pressure, argon, ethanol):
+    def setData(self, data, setpoint):
         try:
-            self.temperature = decimal.Decimal(temperature)
-            self.pressure = decimal.Decimal(pressure)
-            self.argon = decimal.Decimal(argon)
-            self.ethanol = decimal.Decimal(ethanol)
+            self.temperature = decimal.Decimal(data[0])
+            self.pressure = decimal.Decimal(data[1])
+            self.argon = decimal.Decimal(data[2])
+            self.ethanol = decimal.Decimal(data[3])
         except:
             self.temperature = 0.00
             self.pressure = 0.00
             self.argon = 0.00
             self.ethanol = 0.00
+        try:
+            self.spTemperature = setpoint[0]
+            self.spPressure = setpoint[1]
+            self.spEthanol = setpoint[2]
+            self.spArgon = setpoint[3]
+        except:
+            self.spTemperature = 0
+            self.spPressure = 1000
+            self.spEthanol = 0
+            self.spArgon = 0
+        sql = """UPDATE `cvd`.`runtime_arduino`
+                SET	`temperature`	= %s,
+                        `pressure`	= %s,
+                        `ethanol`	= %s,
+                        `argon`		= %s,
+                        `spTemperature` = %s,
+                        `spPressure`	= %s,
+                        `spEthanol`	= %s,
+                        `spArgon`	= %s;"""  % (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon)
+        return self.writeArduino(sql)
+
+    def setLogFile(self, fileName):
+        id = self.getRecordingID()
+        if id < 0:
+            return False
+        sql = """UPDATE `cvd`.`recording`
+                    SET	`filename`  = '%s',
+                        `recording` = 1
+                    WHERE `id` = %i
+                    LIMIT 1;""" % (fileName, id)
+        if not self.writeRecording(sql):
+            return False
+        if self.getLogFile() == fileName:
+            return True
+        else:
+            return False
+
+    def isRecording(self):
+        sql = """SELECT `recording`
+                    FROM `cvd`.`runtime_recording`
+                    LIMIT 1;"""
+        try:
+            data = self.read(sql)
+        except:
+            return False
+        if not len(data) == 1:
+            return False
+        else:
+            if data[0]:
+                return True
+            else:
+                return False
+
+    def stopRecording(self):
+        sql = """UPDATE `cvd`.`runtime_recording`
+                SET	`recording` = 0;"""
+        if not self.writeRecording(sql):
+            return False
+        sql = """UPDATE `cvd`.`recording`
+                SET	`recording` = 0
+                WHERE `recording` = 1;"""
+        if not self.writeRecording(sql):
+            return False
+        self.recordingID = -1
+        return True
+
+    def startRecording(self, filename = ''):
+        self.stopRecording
+
+        sql = """INSERT INTO `cvd`.`recording` (
+                `id` ,`time` , `recording` , `filename` )
+                VALUES (
+                NULL , CURRENT_TIMESTAMP , 1, '%s')""" % filename
+        if not self.writeRecording(sql):
+            return False
+        sql = """SELECT `id`
+        FROM `cvd`.`recording`
+                WHERE `recording` = 1
+                LIMIT 1;"""
+        data = self.read(sql)
+        if not len(data) == 1:
+            return False
+        sql = """UPDATE `cvd`.`runtime_recording`
+                SET `id_recording` = %i,
+                    `recording` = 1
+                LIMIT 1;""" % data
+        if not self.writeRecording(sql):
+            return False
+        return True
+
+    def getRecordingID(self):
+        sql = """SELECT `id_recording`
+                    FROM `cvd`.`runtime_recording`
+                    LIMIT 1;"""
+        data = self.read(sql)
+        if (len(data) == 1):
+            return int(data[0])
+        else:
+            return -1
+
+    def getLogFile(self):
+        # get id from memory table
+        recordingID = self.getRecordingID()
+        # update filename from disc table if not already saved in class
+        if not (recordingID == self.recordingID) or len(self.fileName) == 0:
+            print "querying filename from sql table"
+            self.close()
+            sql = """SELECT `filename`
+                    FROM `cvd`.`recording`
+                    WHERE `id` = %i;""" % recordingID
+            data = self.read(sql)
+            if len(data) == 1:
+                self.fileName = data[0]
+            else:
+                self.fileName = ''
+            self.recordingID = recordingID
+        return self.fileName
+
+    def setMessage(self, message):
+        sql = """INSERT INTO `cvd`.`message`
+                (`text`) VALUES ('%s');"""  % (message)
+        if self.writeMessage(sql):
+            return self.updateMessage()
+        return False
+
+    def updateMessage(self):
+        sql = """SELECT `id` FROM `cvd`.`message`
+                WHERE `processed` = 0
+                LIMIT 1;"""
+        data = self.read(sql)
+        if (len(data) == 1):
+            id_message = data[0]
+            ready = 1
+        else:
+            ready = 0
+            id_message = -1
+
+        sql = """UPDATE `cvd`.`runtime_message`
+                SET `ready` = %i,
+                    `id_message` = %i
+                LIMIT 1;""" % (ready, id_message)
+        return self.writeMessage(sql)
+
+    def isReady(self):
+        if self.ready:
+            return True
+        sql = """SELECT `ready`, `id_message`
+                FROM `cvd`.`runtime_message`;"""
+        try:
+            data = self.read(sql)
+        except:
+            return False
+        if not len(data) == 2:
+                data = (0,-1)
+        (self.ready, self.messageID) = data
+        if self.ready:
+            return True
+        else:
+            return False
+
+    def getMessage(self):
+        self.message = ""
+        # read from runtime (memory table)
+        if self.isReady():
+            # ready flag did also read out messageID.
+            # get message string from cvd.message
+            sql = """SELECT `text`
+                FROM `cvd`.`message`
+                WHERE `id` = %i
+                LIMIT 1;""" % self.messageID
+            data = self.read(sql)
+            if (len(data) == 1):
+                self.message = data[0]
+                # mark message in cvd.message as processed 
+                sql = """UPDATE `cvd`.`message`
+                    SET `processed` = 1
+                    WHERE `id` = %i;""" % self.messageID
+                self.writeMessage(sql)
+            self.updateMessage()
+        # reset readout
+        self.ready = False
+        return self.message
+
+    def setFlowbus(self, instrument, process, flowBus, dataTypeString, dataInput, timeInput, parameterName):
+        time = decimal.Decimal(timeInput)
+        parameterName = parameterName.encode("hex")
+        if (dataTypeString == "character"):
+            dataType = 0
+            data = format(int(dataInput), 'x')
+        elif(dataTypeString == "integer"):
+            dataType = 1
+            data = format(int(dataInput), 'x')
+        elif(dataTypeString == "long"):
+            dataType = 2
+            data = format(int(dataInput), 'x')
+        elif(dataTypeString == "string"):
+            dataType = 3
+            data = dataInput.encode("hex")
+        else:
+            raise ValueError("can not identify dataType at setFlowBus()")
+
+        sql = """
+        INSERT INTO `cvd`.`runtime_flowbus`
+        (`instrument`,`process`,`flowBus`,`dataType`,`data`,`time`, `parameter`)
+        VALUES
+        (%i, %i, %i, %i, UNHEX(LPAD('%s',%i,'0')), %.2f, UNHEX(LPAD('%s',%i,'0')))""" % (instrument, process, flowBus, dataType, data, self.storage_values * 2, time, parameterName, self.storage_description * 2)
+        sql += """
+        ON DUPLICATE KEY UPDATE
+        `data` = UNHEX(LPAD('%s',%i,'0')),
+        `time` = %.2f;""" % (data, self.storage_values * 2, time)
+        self.writeFlowbus(sql)
+
+    def getFlowbus(self, instrument, process, flowBus):
+        sql = """
+        SELECT `dataType`,TRIM(LEADING '0' FROM HEX(`data`)),`time`,TRIM(LEADING '0' FROM HEX(`parameter`))
+        FROM `cvd`.`runtime_flowbus`
+        WHERE
+        (   `instrument`    = %i
+        AND `process`       = %i
+        AND `flowBus`       = %i);
+        """ % (instrument, process, flowBus)
+        data = self.read(sql)
+        if (len(data) == 4):
+            (dataType, dataOut, timeOut, parameter) = data
+        else:
+            return (-1,-1,-1)
+
+        parameter = parameter.decode("hex")
+        time = decimal.Decimal(timeOut)
+        if (dataType == 0):
+            data = int(dataOut, 16)
+        elif(dataType == 1):
+            data = int(dataOut, 16)
+        elif(dataType == 2):
+            data = FBconvertLong(process, flowBus, int(dataOut,16))
+        elif(dataType == 3):
+            data = dataOut.decode("hex")
+        else:
+            raise ValueError("can not identify dataType at getFlowBus()")
+
+        return (parameter, data, time)
+
+    def getAll(self):
+        sql = """SELECT temperature, pressure, ethanol, argon,
+                             spTemperature, spPressure, spEthanol, spArgon
+                      FROM `cvd`.`runtime_arduino`
+                      LIMIT 1"""
+        data = self.read(sql)
+        if len(data) == 0:
+            print "database readout failed for arduino!"
+            data = (-1,-1,-1,-1, -1,-1,-1,-1)
+        (self.temperature, self.pressure, self.ethanol, self.argon, self.spTemperature, self.spPressure, self.spEthanol, self.spArgon) = data
+
+class UpdateError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
+class TimeoutError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+
         sql = """UPDATE `cvd`.`runtime_arduino`
                 SET	`temperature`	= %s,
                         `pressure`	= %s,
                         `ethanol`	= %s,
                         `argon`		= %s
-                LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon)
+                        `spTemperature` = %s,
+                        `spPressure`	= %s,
+                        `spEthanol`	= %s,
+                        `spArgon`	= %s
+                LIMIT 1;"""  % (self.temperature, self.pressure, self.ethanol, self.argon, setpoint[0], setpoint[1], setpoint[2], setpoint[2])
         return self.writeArduino(sql)
 
     def setLogFile(self, fileName):
