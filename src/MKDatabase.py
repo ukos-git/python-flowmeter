@@ -109,13 +109,12 @@ class MKDatabase(object):
             cursor = db.cursor()
             cursor.execute(sql)
             data = cursor.fetchone()
-            connection.send(data)
             cursor.close()
-            connection.close()
         except:
-            connection.close()
-            return False
-        return True
+            connection.send([])
+        else:
+            connection.send(data)
+        connection.close()
 
     # from alex martelli on http://stackoverflow.com/questions/1507091/python-mysqldb-query-timeout
     def write(self, sql, update = False):
@@ -147,7 +146,14 @@ class MKDatabase(object):
         subproc.start()
         subproc.join(1)
         if conn_parent.poll():
-            return conn_parent.recv()
+            data = conn_parent.recv()
+            try:
+                if len(data) == 0:
+                    raise
+            except:
+                return []
+            else:
+                return data
         else:
             subproc.terminate()
             return []
