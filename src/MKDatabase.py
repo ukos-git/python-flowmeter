@@ -367,10 +367,10 @@ class MKDatabase(object):
             self.argon = 0.00
             self.ethanol = 0.00
         try:
-            self.spTemperature = setpoint[0]
-            self.spPressure = setpoint[1]
-            self.spEthanol = setpoint[2]
-            self.spArgon = setpoint[3]
+            self.spTemperature = int(setpoint[0])
+            self.spPressure = int(setpoint[1])
+            self.spArgon = int(setpoint[2])
+            self.spEthanol = int(setpoint[3])
         except:
             self.spTemperature = 0
             self.spPressure = 1000
