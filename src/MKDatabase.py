@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import MySQLdb
+import MySQLdb as mysqlconnector
 from MySQLdb.constants import CLIENT
 import os
 import socket
@@ -50,7 +50,7 @@ class MKDatabase(object):
                 else:
                     dbUser = "cvd-other"
                     dbPass = "bmF94vVXAB5yf7Mx"
-            self.db = MySQLdb.connect(
+            self.db = mysqlconnector.connect(
                 host = dbHost,
                 user = dbUser,
                 passwd = dbPass,
