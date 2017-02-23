@@ -1,2 +1,2 @@
-# igor-flowmeter
-A program to analyse the (FlowBus) data between Bronkhorst FlowMeter and Bright Display adapter.
+# python-flowmeter
+WIP:application not ready for public release. History rewrites possible on every branch.

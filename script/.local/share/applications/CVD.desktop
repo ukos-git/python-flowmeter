@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application                          # Indicates the type as listed above
+Version=1.0                               # The version of the desktop entry specification to which this file complies
+Name=CVDapp
+Comment=A GUI for the CVD 		  # A comment which can/will be used as a tooltip
+Exec=~/CVDapp/gui/CVDapp.sh     # The executable of the application.
+Icon=~/CVDapp/gui/CVDapp.png   # The name of the icon that will be used to display this entry
+Terminal=false                            # Describes whether this application needs to be run in a terminal or not
+Categories=Programming;      # Describes the categories in which this entry should be shown
