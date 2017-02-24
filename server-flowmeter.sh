@@ -11,4 +11,4 @@ if [ "$(hostname)" == "uk-work" ]
 then
     python /home/matthias/Documents/programs/python/python-flowmeter/src/serverFlowmeter.py
 fi
-
+python ./src/serverFlowmeter.py
