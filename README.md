@@ -23,3 +23,11 @@ The Bronkhorst Bright Adapters will be unnecessary as soon as this program can t
 * There is no client application yet for displaying the readout in a nice way. You can reaed the database using any appropriate application like phpmyadmin.
 * Start active communication without Bright Display Adapter.
 * The bridge stops working at some point. Reason is not clear.
+
+# Get Started
+Without the proper FlowMeters installed, you can input one of the log file from ./input/log[1,2]. To do this look at the commented line in `MKFlowMain.py-->MKFlow()-->init():`
+```python
+self.Input.setBridge(port1, port2)
+#self.Input.setLogFile('/home/matthias/Documents/programs/python/swnt-reactor/data/log/bridge/testing/log1.log')
+```
+uncomment the setLogFile and comment the setBridge to input the contents of the log file.
