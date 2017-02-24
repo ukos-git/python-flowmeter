@@ -1,14 +1,14 @@
 #!/bin/bash
 if [ "$(hostname)" == "raspberrypi" ]
 then
-    python /home/pi/programs/swnt-reactor/src/serverFlowmeter.py
+    python /home/pi/programs/python-flowmeter/src/serverFlowmeter.py
 fi
 if [ "$(hostname)" == "lab117" ]
 then
-    python /home/lab/programs/swnt-reactor/src/serverFlowmeter.py
+    python /home/lab/programs/python-flowmeter/src/serverFlowmeter.py
 fi
 if [ "$(hostname)" == "uk-work" ]
 then
-    python /home/matthias/Documents/programs/python/swnt-reactor/src/serverFlowmeter.py
+    python /home/matthias/Documents/programs/python/python-flowmeter/src/serverFlowmeter.py
 fi
 
