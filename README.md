@@ -1,8 +1,5 @@
 # python-flowmeter
-WIP:application not ready for public release. History rewrites possible on every branch.
-
-# description
-Store data from Bronkhorst FlowMeters in a MySQL database. With this connection it is possible to access the FlowBus data over the network by other devices.
+Store data from Bronkhorst FlowMeters in a MySQL database. With this connection it is also possible to access the FlowBus data over the network by other devices.
 Stand-alone version for [python-swnt-reactor](https://github.com/ukos-git/python-swnt-reactor)
 
 # how it works
